@@ -1,0 +1,238 @@
+.scene {
+  height: 100%;
+  overflow-y: auto;
+  background:
+    radial-gradient(ellipse at 50% -10%, rgba(255, 61, 129, 0.16), transparent 55%),
+    radial-gradient(ellipse at 15% 110%, rgba(53, 224, 255, 0.1), transparent 50%),
+    var(--bg-stage);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(16px, 4vh, 48px) clamp(16px, 4vw, 64px);
+  gap: clamp(14px, 2.5vh, 28px);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(44px, 7vw, 96px);
+  letter-spacing: 0.06em;
+  line-height: 0.95;
+  text-align: center;
+  color: var(--ink-warm);
+  text-shadow:
+    0 0 30px rgba(255, 182, 40, 0.35),
+    0 4px 0 rgba(0, 0, 0, 0.4);
+}
+
+.titleAccent {
+  color: var(--pink);
+  text-shadow: 0 0 30px rgba(255, 61, 129, 0.5);
+}
+
+.intro {
+  color: var(--ink-muted);
+  text-align: center;
+  max-width: 560px;
+  font-size: 15px;
+}
+
+.controlsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(16px, 3vw, 44px);
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.controlGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.controlLabel {
+  font-family: var(--font-display);
+  font-size: 18px;
+  letter-spacing: 0.14em;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+}
+
+.countRow {
+  display: flex;
+  gap: 8px;
+}
+
+.countButton {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-m);
+  font-family: var(--font-display);
+  font-size: 26px;
+  color: var(--ink-warm);
+  background: var(--tile-face);
+  border: 1px solid var(--tile-edge);
+  box-shadow: var(--shadow-tile);
+  transition:
+    transform var(--dur-fast) var(--ease-snap),
+    box-shadow var(--dur-fast),
+    border-color var(--dur-fast);
+}
+
+.countButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.countButtonActive {
+  border-color: var(--gold);
+  color: var(--bg-void);
+  background: linear-gradient(180deg, var(--gold), var(--gold-deep));
+  box-shadow: var(--shadow-tile), var(--glow-gold);
+}
+
+.countHint {
+  font-size: 13px;
+  color: var(--ink-faint);
+  min-height: 18px;
+}
+
+.sliderWrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.slider {
+  width: 220px;
+  accent-color: var(--gold);
+}
+
+.sliderValue {
+  font-family: var(--font-display);
+  font-size: 30px;
+  color: var(--gold);
+  min-width: 74px;
+  text-align: left;
+}
+
+.pool {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  max-width: 760px;
+}
+
+.poolItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 72px;
+  font-size: 11px;
+  color: var(--ink-muted);
+  text-align: center;
+}
+
+.teamsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px;
+  width: 100%;
+  max-width: 1180px;
+}
+
+.teamCard {
+  background: var(--tile-face);
+  border: 1px solid var(--tile-edge);
+  border-radius: var(--radius-l);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--shadow-tile);
+  position: relative;
+  overflow: hidden;
+}
+
+.teamCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--spotlight);
+  pointer-events: none;
+}
+
+.teamOrder {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--ink-faint);
+  letter-spacing: 0.1em;
+}
+
+.teamName {
+  font-family: var(--font-display);
+  font-size: 25px;
+  letter-spacing: 0.04em;
+  color: var(--ink-warm);
+  min-height: 32px;
+  cursor: text;
+  border-bottom: 1px dashed transparent;
+}
+
+.teamName:hover {
+  border-bottom-color: var(--tile-edge);
+}
+
+.teamNameInput {
+  font-family: var(--font-display);
+  font-size: 24px;
+  letter-spacing: 0.04em;
+  color: var(--ink-warm);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-s);
+  padding: 2px 8px;
+  width: 100%;
+}
+
+.teamMembers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.memberChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 999px;
+  padding: 3px 10px 3px 4px;
+  font-size: 12.5px;
+  color: var(--ink);
+}
+
+.actionsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+}
+
+.startHint {
+  font-size: 13px;
+  color: var(--ink-faint);
+  text-align: center;
+  min-height: 18px;
+}
+
+.nameError {
+  color: var(--danger);
+  font-size: 13px;
+}

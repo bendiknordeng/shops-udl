@@ -1,0 +1,61 @@
+# Deploy av Shops UDL Quiz til GitHub Pages.
+#
+# BEVISST kun manuell trigger (workflow_dispatch): workflowen skal ikke
+# aktiveres før appen er klar for midlertidig domene-cutover (STACK.md).
+# Rollback: bytt Pages-kilden tilbake til main/docs.
+name: Deploy Shops UDL Quiz
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: shops-udl-quiz
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Ugyldig spillpakke blokkerer deploy (kjøres også i pnpm build).
+      - name: Validate game pack
+        run: pnpm validate
+
+      - name: Build
+        run: pnpm build
+
+      # Bevar custom-domain-konfigurasjonen for hksplit.no.
+      - name: Add CNAME
+        run: echo 'hksplit.no' > dist/CNAME
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,66 @@
+/* Nøkkelrammer for dekorativ bevegelse. Reduced motion beholder mening
+   med kortere fades og uten romlig intens bevegelse. */
+
+@keyframes pulseGlow {
+  0%,
+  100% {
+    box-shadow: var(--glow-gold);
+  }
+  50% {
+    box-shadow: 0 0 34px rgba(255, 182, 40, 0.65);
+  }
+}
+
+@keyframes spotlightSweep {
+  0% {
+    transform: translateX(-30%) rotate(-4deg);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateX(30%) rotate(4deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(-30%) rotate(-4deg);
+    opacity: 0.5;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes urgentPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+@keyframes floatSubtle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.15s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.15s !important;
+  }
+}

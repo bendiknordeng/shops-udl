@@ -1,0 +1,124 @@
+.leaderboard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: clamp(10px, 1.6vh, 18px) 12px;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.heading {
+  font-family: var(--font-display);
+  font-size: 16px;
+  letter-spacing: 0.18em;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.teamCard {
+  position: relative;
+  background: var(--tile-face);
+  border: 1px solid var(--tile-edge);
+  border-radius: var(--radius-m);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: var(--shadow-tile);
+  transition:
+    transform var(--dur-med) var(--ease-stage),
+    box-shadow var(--dur-med) var(--ease-stage),
+    border-color var(--dur-med);
+}
+
+.teamCardActive {
+  border-color: var(--gold);
+  box-shadow: var(--shadow-tile), var(--glow-gold);
+  transform: scale(1.03);
+}
+
+.teamCardActive::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: var(--spotlight);
+  pointer-events: none;
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.teamName {
+  font-family: var(--font-display);
+  font-size: 17px;
+  letter-spacing: 0.05em;
+  color: var(--ink-warm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.turnBadge {
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--bg-void);
+  background: linear-gradient(180deg, var(--gold), var(--gold-deep));
+  border-radius: 999px;
+  padding: 2px 8px;
+  flex-shrink: 0;
+  animation: floatSubtle 2.2s ease-in-out infinite;
+}
+
+.bottomRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.avatars {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.avatars > * {
+  margin-right: -8px;
+}
+
+.score {
+  font-family: var(--font-display);
+  font-size: 27px;
+  color: var(--gold);
+  text-shadow: 0 0 12px rgba(255, 182, 40, 0.35);
+  min-width: 64px;
+  text-align: right;
+  line-height: 1;
+}
+
+/* Toppstripe-variant på smale skjermer */
+@media (max-width: 1099px) {
+  .leaderboard {
+    flex-direction: row;
+    height: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 8px 12px;
+  }
+
+  .heading {
+    display: none;
+  }
+
+  .teamCard {
+    min-width: 170px;
+    flex-shrink: 0;
+  }
+}

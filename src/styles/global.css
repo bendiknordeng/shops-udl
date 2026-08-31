@@ -1,0 +1,126 @@
+@import './tokens.css';
+@import './motion.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg-void);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 16px;
+  line-height: 1.4;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font-family: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+input,
+select {
+  font-family: inherit;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+::selection {
+  background: var(--pink);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+/* Gjenbrukbare scene-knapper */
+.stageButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: var(--radius-m);
+  font-family: var(--font-display);
+  font-size: 20px;
+  letter-spacing: 0.08em;
+  color: var(--bg-void);
+  background: linear-gradient(180deg, var(--gold) 0%, var(--gold-deep) 100%);
+  box-shadow: var(--shadow-tile), var(--glow-gold);
+  transition:
+    transform var(--dur-fast) var(--ease-snap),
+    box-shadow var(--dur-fast) var(--ease-stage),
+    filter var(--dur-fast) var(--ease-stage);
+}
+
+.stageButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+}
+
+.stageButton:active:not(:disabled) {
+  transform: translateY(1px) scale(0.98);
+}
+
+.stageButton--ghost {
+  color: var(--ink-warm);
+  background: transparent;
+  border: 1px solid var(--tile-edge);
+  box-shadow: none;
+}
+
+.stageButton--ghost:hover:not(:disabled) {
+  border-color: var(--gold);
+  box-shadow: var(--glow-gold);
+}
+
+.stageButton--danger {
+  background: linear-gradient(180deg, var(--pink) 0%, #c21b57 100%);
+  color: var(--ink);
+  box-shadow: var(--shadow-tile), var(--glow-pink);
+}
+
+.stageButton--small {
+  padding: 6px 14px;
+  font-size: 16px;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

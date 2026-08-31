@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <defs>
+    <radialGradient id="stage" cx="50%" cy="18%" r="90%">
+      <stop offset="0%" stop-color="#31114f"/>
+      <stop offset="55%" stop-color="#1a0830"/>
+      <stop offset="100%" stop-color="#0b0217"/>
+    </radialGradient>
+    <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffb628" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#ffb628" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#stage)"/>
+  <polygon points="320,0 200,720 560,720" fill="url(#beam)" opacity="0.6"/>
+  <polygon points="960,0 720,720 1080,720" fill="url(#beam)" opacity="0.45"/>
+  <circle cx="640" cy="300" r="170" fill="none" stroke="#ff3d81" stroke-width="6" opacity="0.7"/>
+  <text x="640" y="380" font-family="Arial Black, Arial, sans-serif" font-size="220" font-weight="900" text-anchor="middle" fill="#ffe9c2">?</text>
+  <text x="640" y="600" font-family="Arial, sans-serif" font-size="40" text-anchor="middle" fill="#b9a4d6" letter-spacing="6">PLASSHOLDERBILDE</text>
+  <text x="640" y="650" font-family="Arial, sans-serif" font-size="24" text-anchor="middle" fill="#7c6a99">Bytt ut med AI-generert bilde i public/media/images/</text>
+</svg>

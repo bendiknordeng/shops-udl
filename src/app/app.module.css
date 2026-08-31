@@ -1,0 +1,139 @@
+.appFrame {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr clamp(220px, 18vw, 300px);
+  grid-template-rows: 1fr auto;
+  grid-template-areas:
+    'stage side'
+    'dock dock';
+  background: var(--bg-stage);
+}
+
+.stageArea {
+  grid-area: stage;
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.sideArea {
+  grid-area: side;
+  min-height: 0;
+  border-left: 1px solid rgba(255, 233, 194, 0.08);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.dockArea {
+  grid-area: dock;
+}
+
+@media (max-width: 1099px) {
+  .appFrame {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas:
+      'side'
+      'stage'
+      'dock';
+  }
+
+  .sideArea {
+    border-left: none;
+    border-bottom: 1px solid rgba(255, 233, 194, 0.08);
+  }
+}
+
+.fullScene {
+  height: 100%;
+  position: relative;
+}
+
+.hostWindowButton {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  z-index: 10;
+}
+
+.bootScreen {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  background:
+    radial-gradient(ellipse at 50% -10%, rgba(255, 61, 129, 0.16), transparent 55%),
+    var(--bg-stage);
+  padding: 24px;
+}
+
+.bootLogo {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 8vw, 90px);
+  letter-spacing: 0.08em;
+  color: var(--ink-warm);
+  text-shadow: 0 0 30px rgba(255, 182, 40, 0.35);
+  animation: floatSubtle 2.4s ease-in-out infinite;
+}
+
+.bootLogo span {
+  color: var(--pink);
+}
+
+.bootHint {
+  color: var(--ink-faint);
+  font-size: 14px;
+}
+
+.resumeCard {
+  background: var(--tile-face);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-l);
+  box-shadow: var(--shadow-pop), var(--glow-gold);
+  padding: 30px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  max-width: min(480px, 92vw);
+  text-align: center;
+}
+
+.resumeTitle {
+  font-family: var(--font-display);
+  font-size: 30px;
+  letter-spacing: 0.08em;
+  color: var(--ink-warm);
+}
+
+.resumeText {
+  color: var(--ink-muted);
+  font-size: 14px;
+}
+
+.resumeActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.errorList {
+  color: var(--danger);
+  font-size: 13px;
+  text-align: left;
+  max-width: min(640px, 90vw);
+  max-height: 50vh;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 92, 92, 0.4);
+  border-radius: var(--radius-m);
+  padding: 14px 18px;
+  margin: 0;
+}
+
+.errorList li {
+  margin-bottom: 4px;
+}
