@@ -10,8 +10,14 @@ import {
   drawTeamNames,
   expectedTeamSizes,
 } from '../../game/allocate-teams'
-import { canStartGame } from '../../game/game-machine'
+import {
+  canStartGame,
+  DEFAULT_ANSWER_WINDOW_SECONDS,
+  MAX_ANSWER_WINDOW_SECONDS,
+  MIN_ANSWER_WINDOW_SECONDS,
+} from '../../game/game-machine'
 import { getParticipant } from '../../game/selectors'
+import { teamColorStyle } from '../../game/team-colors'
 import { Avatar, preloadAvatars } from '../common/Avatar'
 import styles from './setup.module.css'
 
@@ -26,6 +32,7 @@ export function SetupScene() {
   const sceneRef = useRef<HTMLDivElement>(null)
   const teamsDrawn = context.teams.length > 0
   const manual = pack.manualTeams !== null
+  const answerWindowSeconds = context.answerWindowSeconds ?? DEFAULT_ANSWER_WINDOW_SECONDS
   const spotlightParticipant =
     spotlightParticipantId == null ? null : getParticipant(pack, spotlightParticipantId)
   const presentationTeam =
@@ -217,6 +224,25 @@ export function SetupScene() {
             <span className={styles.sliderValue}>{context.answerSeconds} s</span>
           </div>
         </div>
+
+        <div className={styles.controlGroup}>
+          <span className={styles.controlLabel}>Tid til å avgi svar</span>
+          <div className={styles.sliderWrap}>
+            <input
+              type="range"
+              className={styles.slider}
+              min={MIN_ANSWER_WINDOW_SECONDS}
+              max={MAX_ANSWER_WINDOW_SECONDS}
+              step={1}
+              value={answerWindowSeconds}
+              onChange={(e) =>
+                send({ type: 'SET_ANSWER_WINDOW_SECONDS', seconds: Number(e.target.value) })
+              }
+              aria-label="Tid til å avgi svar i sekunder"
+            />
+            <span className={styles.sliderValue}>{answerWindowSeconds} s</span>
+          </div>
+        </div>
       </div>
 
       {!teamsDrawn ? (
@@ -237,7 +263,12 @@ export function SetupScene() {
       ) : (
         <div className={styles.teamsGrid}>
           {context.teams.map((team, index) => (
-            <div key={team.id} className={styles.teamCard} data-anim="team-card">
+            <div
+              key={team.id}
+              className={styles.teamCard}
+              data-anim="team-card"
+              style={teamColorStyle(index)}
+            >
               <span className={styles.teamOrder}>Tur {index + 1}</span>
               {editingTeamId === team.id ? (
                 <input
@@ -342,6 +373,7 @@ export function SetupScene() {
       {presentationTeam && presentationTeamIndex != null && (
         <div
           className={styles.presentationOverlay}
+          style={teamColorStyle(presentationTeamIndex)}
           role="dialog"
           aria-modal="true"
           aria-label={`Presentasjon av ${presentationTeam.name}`}
@@ -393,6 +425,7 @@ export function SetupScene() {
                   <span
                     key={team.id}
                     className={`${styles.presentationDot} ${index === presentationTeamIndex ? styles.presentationDotActive : ''}`}
+                    style={teamColorStyle(index)}
                   />
                 ))}
               </div>

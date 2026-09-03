@@ -185,7 +185,7 @@ function MainApp() {
 
 function GameShell() {
   const { actorRef } = useGame()
-  useHotkeys()
+  const boardKeyboardSelection = useHotkeys()
   const remoteConnected = useHostRemoteServer()
 
   // Skjules hovedvinduet mens en gate-animasjon kjører, fullfør den — rAF
@@ -222,7 +222,7 @@ function GameShell() {
   return (
     <div className={styles.appFrame}>
       <div className={styles.stageArea}>
-        <BoardScene />
+        <BoardScene keyboardSelection={boardKeyboardSelection} />
         {inClue && <ClueScene />}
         {inSummary && <SummaryScene />}
         {inFinale && <FinaleScene />}

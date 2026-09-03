@@ -1,8 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import type { GamePack } from '../../content/schemas'
 import type { GameEvent } from '../../game/game-events'
-import { boardColumns, getCategory, getClue } from '../../game/selectors'
+import type { BoardKeyboardSelection } from '../../app/useHotkeys'
+import {
+  DEFAULT_ANSWER_WINDOW_SECONDS,
+  MAX_ANSWER_WINDOW_SECONDS,
+  MIN_ANSWER_WINDOW_SECONDS,
+} from '../../game/game-machine'
+import { boardColumns, getCategory, getClue, sortedByScore } from '../../game/selectors'
 import { remainingMs } from '../../game/timer'
+import { teamColorStyle } from '../../game/team-colors'
 import { CLUE_VALUES } from '../../content/schemas'
 import {
   HOST_CHANNEL,
@@ -15,6 +22,7 @@ import { TYPE_LABELS } from '../common/TypeIcon'
 import styles from './remote.module.css'
 
 const STALE_MS = 4000
+const AWARD_CONFIRM_WINDOW_MS = 1500
 
 const PHASE_LABELS: Record<ReturnType<typeof remotePhase>, string> = {
   setup: 'Oppsett (styres i hovedvinduet)',
@@ -23,13 +31,16 @@ const PHASE_LABELS: Record<ReturnType<typeof remotePhase>, string> = {
   presenting: 'Gjør klar rute …',
   ready: 'Gjør dere klare',
   active: 'Aktiv svarfase',
+  answerDelay: 'Venter før svarrunde …',
   open: 'Åpen svarfase',
   decided: 'Avgjort — klar for brettet',
+  review: 'Fasit og poeng',
   summary: 'Oppsummering',
   finale: 'Finale',
 }
 
 type PendingDecision = { kind: 'award'; teamId: string } | { kind: 'none' } | null
+type PendingAwardShortcut = { key: string; clueId: string; pressedAt: number }
 
 /**
  * VERTSVINDUET: privat fjernkontroll i egen popup/fane (?host=1).
@@ -44,6 +55,9 @@ export function RemoteHostWindow({ pack }: { pack: GamePack }) {
   const [confirmReset, setConfirmReset] = useState(false)
   const channelRef = useRef<BroadcastChannel | null>(null)
   const lastSeenRef = useRef(0)
+  const pendingAwardRef = useRef<PendingAwardShortcut | null>(null)
+  const [boardMode, setBoardMode] = useState<BoardKeyboardSelection['mode']>('column')
+  const [boardSelection, setBoardSelection] = useState<BoardKeyboardSelection | null>(null)
 
   useEffect(() => {
     document.title = 'SHOPS UDL — Kontroller'
@@ -86,15 +100,131 @@ export function RemoteHostWindow({ pack }: { pack: GamePack }) {
     phase === 'presenting' ||
     phase === 'ready' ||
     phase === 'active' ||
+    phase === 'answerDelay' ||
     phase === 'open' ||
-    phase === 'decided'
+    phase === 'decided' ||
+    phase === 'review'
   const clueStarted = phase === 'active' || phase === 'open' || phase === 'decided'
   const canDecide = phase === 'active' || phase === 'open'
   const activeTeam = context?.teams[context.activeTeamIndex] ?? null
+  const answerWindowSeconds = context?.answerWindowSeconds ?? DEFAULT_ANSWER_WINDOW_SECONDS
 
   // Nullstill ventende avgjørelse ved rute-/faseskifte.
   const clueKey = context?.activeClueId ?? ''
   useEffect(() => setPending(null), [clueKey, phase])
+
+  useEffect(() => {
+    if (phase === 'board') return
+    setBoardSelection(null)
+  }, [phase])
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      const target = e.target as HTMLElement | null
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+        return
+      }
+      if (phase === 'board' && e.key === "'") {
+        if (e.metaKey || e.ctrlKey || e.altKey) return
+        e.preventDefault()
+        if (e.repeat) return
+        const nextMode = boardMode === 'column' ? 'row' : 'column'
+        setBoardMode(nextMode)
+        setBoardSelection((selection) => {
+          if (!selection) return null
+          return { ...selection, mode: nextMode }
+        })
+        return
+      }
+      const clearBoardSelectionKey = e.key === 'Escape' || e.key === 'x' || e.key === 'X'
+      if (phase === 'board' && clearBoardSelectionKey && boardSelection) {
+        e.preventDefault()
+        setBoardSelection(null)
+        return
+      }
+      if (phase === 'board' && context && /^[1-5]$/.test(e.key)) {
+        if (e.metaKey || e.ctrlKey || e.altKey) return
+        e.preventDefault()
+        if (e.repeat) return
+        const digitIndex = Number(e.key) - 1
+
+        if (!boardSelection) {
+          setBoardSelection({ mode: boardMode, index: digitIndex })
+          return
+        }
+
+        let columnIndex = digitIndex
+        let rowIndex = boardSelection.index
+        if (boardSelection.mode === 'column') {
+          columnIndex = boardSelection.index
+          rowIndex = digitIndex
+        }
+        const cell = boardColumns(pack, context.usedClueIds)[columnIndex]?.cells[rowIndex]
+        if (!cell?.clue) return
+        setBoardSelection(null)
+        if (cell.used) sendEvent({ type: 'OPEN_USED_CLUE', clueId: cell.clue.id })
+        else sendEvent({ type: 'OPEN_CLUE', clueId: cell.clue.id })
+        return
+      }
+      if ((e.key === '+' || e.key === '-') && context) {
+        if (e.metaKey || e.ctrlKey || e.altKey) return
+        const mainTimerRunning = phase === 'active' && context.timer.status === 'running'
+        const answerWindowRunning =
+          phase === 'open' && context.answerWindowTimer?.status === 'running'
+        if (!mainTimerRunning && !answerWindowRunning) return
+
+        e.preventDefault()
+        if (e.repeat) return
+        const deltaSeconds = e.key === '+' ? 5 : -5
+        sendEvent({ type: 'ADJUST_COUNTDOWN', deltaSeconds })
+        return
+      }
+      if (
+        (e.key === 'r' || e.key === 'R') &&
+        phase === 'decided' &&
+        context?.lastOutcome?.kind === 'award'
+      ) {
+        e.preventDefault()
+        if (!e.repeat) sendEvent({ type: 'RESET_CLUE_AWARD' })
+        return
+      }
+      if (!canDecide || !context || !clue) {
+        pendingAwardRef.current = null
+        return
+      }
+      if (!/^[0-9]$/.test(e.key)) {
+        pendingAwardRef.current = null
+        return
+      }
+      if (e.metaKey || e.ctrlKey || e.altKey) return
+      e.preventDefault()
+      if (e.repeat) return
+
+      const now = Date.now()
+      const pendingAward = pendingAwardRef.current
+      const confirmed =
+        pendingAward?.key === e.key &&
+        pendingAward.clueId === clue.id &&
+        now - pendingAward.pressedAt <= AWARD_CONFIRM_WINDOW_MS
+
+      if (!confirmed) {
+        pendingAwardRef.current = { key: e.key, clueId: clue.id, pressedAt: now }
+        return
+      }
+
+      pendingAwardRef.current = null
+      let team = null
+      if (e.key === '0') {
+        team = context.teams[context.activeTeamIndex] ?? null
+      } else {
+        team = sortedByScore(context.teams)[Number(e.key) - 1] ?? null
+      }
+      if (team) sendEvent({ type: 'AWARD_CLUE', teamId: team.id })
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [boardMode, boardSelection, canDecide, clue, context, pack, phase])
 
   if (!state || !context) {
     return (
@@ -129,7 +259,11 @@ export function RemoteHostWindow({ pack }: { pack: GamePack }) {
       </div>
 
       {activeTeam && (
-        <div className={styles.activeTurnCard} aria-label={`Tur: ${activeTeam.name}`}>
+        <div
+          className={styles.activeTurnCard}
+          style={teamColorStyle(context.activeTeamIndex)}
+          aria-label={`Tur: ${activeTeam.name}`}
+        >
           <span className={styles.activeTurnCardLabel}>Tur</span>
           <strong className={styles.activeTurnCardName}>{activeTeam.name}</strong>
         </div>
@@ -143,6 +277,7 @@ export function RemoteHostWindow({ pack }: { pack: GamePack }) {
             <div
               key={team.id}
               className={`${styles.teamRow} ${i === context.activeTeamIndex ? styles.teamRowActive : ''}`}
+              style={teamColorStyle(i)}
             >
               <span className={styles.teamRowName}>{team.name}</span>
               {i === context.activeTeamIndex && <span className={styles.turnTag}>Tur</span>}
@@ -172,7 +307,15 @@ export function RemoteHostWindow({ pack }: { pack: GamePack }) {
       {phase === 'board' && (
         <div className={styles.section}>
           <span className={styles.sectionTitle}>Åpne rute</span>
-          <RemoteBoard pack={pack} usedClueIds={context.usedClueIds} onOpen={(clueId) => sendEvent({ type: 'OPEN_CLUE', clueId })} />
+          <RemoteBoard
+            pack={pack}
+            usedClueIds={context.usedClueIds}
+            keyboardSelection={boardSelection}
+            onOpen={(clueId, used) => {
+              if (used) sendEvent({ type: 'OPEN_USED_CLUE', clueId })
+              else sendEvent({ type: 'OPEN_CLUE', clueId })
+            }}
+          />
         </div>
       )}
 
@@ -314,11 +457,12 @@ export function RemoteHostWindow({ pack }: { pack: GamePack }) {
                 </div>
               ) : (
                 <div className={styles.row}>
-                  {context.teams.map((team) => (
+                  {context.teams.map((team, index) => (
                     <button
                       key={team.id}
                       type="button"
-                      className={styles.button}
+                      className={`${styles.button} ${styles.teamButton}`}
+                      style={teamColorStyle(index)}
                       onClick={() => setPending({ kind: 'award', teamId: team.id })}
                     >
                       {team.name}
@@ -342,6 +486,18 @@ export function RemoteHostWindow({ pack }: { pack: GamePack }) {
                 type="button"
                 className={`${styles.button} ${styles.buttonPrimary}`}
                 onClick={() => sendEvent({ type: 'RETURN_TO_BOARD' })}
+              >
+                Til brettet
+              </button>
+            </div>
+          )}
+
+          {phase === 'review' && (
+            <div className={styles.section}>
+              <button
+                type="button"
+                className={`${styles.button} ${styles.buttonPrimary}`}
+                onClick={() => sendEvent({ type: 'CLOSE_CLUE_REVIEW' })}
               >
                 Til brettet
               </button>
@@ -404,6 +560,23 @@ export function RemoteHostWindow({ pack }: { pack: GamePack }) {
                 onChange={(e) => sendEvent({ type: 'SET_ANSWER_SECONDS', seconds: Number(e.target.value) })}
               />
               <span className={styles.sliderValue}>{context.answerSeconds} s</span>
+            </div>
+            <div className={styles.sliderRow}>
+              Avgi svar
+              <input
+                type="range"
+                min={MIN_ANSWER_WINDOW_SECONDS}
+                max={MAX_ANSWER_WINDOW_SECONDS}
+                step={1}
+                value={answerWindowSeconds}
+                onChange={(e) =>
+                  sendEvent({
+                    type: 'SET_ANSWER_WINDOW_SECONDS',
+                    seconds: Number(e.target.value),
+                  })
+                }
+              />
+              <span className={styles.sliderValue}>{answerWindowSeconds} s</span>
             </div>
             <div className={styles.sliderRow}>
               Musikk
@@ -507,11 +680,13 @@ function Header({ connected }: { connected: boolean }) {
 function RemoteBoard({
   pack,
   usedClueIds,
+  keyboardSelection,
   onOpen,
 }: {
   pack: GamePack
   usedClueIds: readonly string[]
-  onOpen: (clueId: string) => void
+  keyboardSelection: BoardKeyboardSelection | null
+  onOpen: (clueId: string, used: boolean) => void
 }) {
   const columns = boardColumns(pack, usedClueIds)
   return (
@@ -519,22 +694,33 @@ function RemoteBoard({
       className={styles.boardGrid}
       style={{ gridTemplateColumns: `repeat(${columns.length}, 1fr)` }}
     >
-      {columns.map(({ category }) => (
-        <span key={category.id} className={styles.boardHeaderCell} title={category.title}>
+      {columns.map(({ category }, columnIndex) => (
+        <span
+          key={category.id}
+          className={`${styles.boardHeaderCell} ${keyboardSelection?.mode === 'column' && keyboardSelection.index === columnIndex ? styles.boardHeaderCellKeyboardHighlighted : ''}`}
+          style={keyboardSelection?.mode === 'column' && keyboardSelection.index === columnIndex ? ({ '--keyboard-step': 0 } as React.CSSProperties) : undefined}
+          title={category.title}
+        >
           {category.title}
         </span>
       ))}
-      {CLUE_VALUES.map((value) =>
-        columns.map(({ category, cells }) => {
+      {CLUE_VALUES.map((value, rowIndex) =>
+        columns.map(({ category, cells }, columnIndex) => {
           const cell = cells.find((c) => c.value === value)
           const clue = cell?.clue ?? null
+          const keyboardHighlighted =
+            (keyboardSelection?.mode === 'column' && keyboardSelection.index === columnIndex) ||
+            (keyboardSelection?.mode === 'row' && keyboardSelection.index === rowIndex)
+          let keyboardStep = columnIndex
+          if (keyboardSelection?.mode === 'column') keyboardStep = rowIndex + 1
           return (
             <button
               key={`${category.id}-${value}`}
               type="button"
-              className={styles.boardCell}
-              disabled={!clue || cell?.used}
-              onClick={() => clue && onOpen(clue.id)}
+              className={`${styles.boardCell} ${cell?.used ? styles.boardCellUsed : ''} ${keyboardHighlighted ? styles.boardCellKeyboardHighlighted : ''}`}
+              style={keyboardHighlighted ? ({ '--keyboard-step': keyboardStep } as React.CSSProperties) : undefined}
+              disabled={!clue}
+              onClick={() => clue && onOpen(clue.id, Boolean(cell?.used))}
             >
               {value}
             </button>

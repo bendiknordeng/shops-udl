@@ -22,6 +22,15 @@ export function resumeTimer(timer: TimerState, now = Date.now()): TimerState {
   return { ...timer, status: 'running', deadline: now + timer.remainingMs, remainingMs: null }
 }
 
+export function adjustTimer(timer: TimerState, deltaSeconds: number, now = Date.now()): TimerState {
+  if (timer.status !== 'running' && timer.status !== 'paused') return timer
+  const currentMs = remainingMs(timer, now)
+  const maximumMs = timer.durationMs ?? Number.POSITIVE_INFINITY
+  const adjustedMs = Math.max(0, Math.min(maximumMs, currentMs + deltaSeconds * 1000))
+  if (timer.status === 'paused') return { ...timer, remainingMs: adjustedMs }
+  return { ...timer, deadline: now + adjustedMs }
+}
+
 /** Verten avslutter aktiv svarfase manuelt — frys gjenstående tid. */
 export function stopTimer(timer: TimerState, now = Date.now()): TimerState {
   if (timer.status === 'running' && timer.deadline !== null) {

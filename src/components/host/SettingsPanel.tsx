@@ -2,6 +2,11 @@ import { useState } from 'react'
 import { useSelector } from '@xstate/react'
 import { useGame } from '../../app/GameProvider'
 import { HOTKEY_HELP } from '../../app/useHotkeys'
+import {
+  DEFAULT_ANSWER_WINDOW_SECONDS,
+  MAX_ANSWER_WINDOW_SECONDS,
+  MIN_ANSWER_WINDOW_SECONDS,
+} from '../../game/game-machine'
 import { boardColumns } from '../../game/selectors'
 import styles from './host.module.css'
 
@@ -12,6 +17,7 @@ import styles from './host.module.css'
 export function SettingsPanel({ onClose }: { onClose: () => void }) {
   const { pack, actorRef, send, settings, updateSettings, resetGame } = useGame()
   const context = useSelector(actorRef, (s) => s.context)
+  const answerWindowSeconds = context.answerWindowSeconds ?? DEFAULT_ANSWER_WINDOW_SECONDS
   const [confirmReset, setConfirmReset] = useState(false)
 
   return (
@@ -28,6 +34,20 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
             onChange={(e) => send({ type: 'SET_ANSWER_SECONDS', seconds: Number(e.target.value) })}
           />
           <span className={styles.sliderValue}>{context.answerSeconds} s</span>
+        </div>
+        <div className={styles.sliderRow}>
+          Avgi svar
+          <input
+            type="range"
+            min={MIN_ANSWER_WINDOW_SECONDS}
+            max={MAX_ANSWER_WINDOW_SECONDS}
+            step={1}
+            value={answerWindowSeconds}
+            onChange={(e) =>
+              send({ type: 'SET_ANSWER_WINDOW_SECONDS', seconds: Number(e.target.value) })
+            }
+          />
+          <span className={styles.sliderValue}>{answerWindowSeconds} s</span>
         </div>
       </div>
 

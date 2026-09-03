@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSelector } from '@xstate/react'
 import { useGame } from '../../app/GameProvider'
-import { remainingMs } from '../../game/timer'
+import { idleTimer, remainingMs } from '../../game/timer'
 import styles from './timer.module.css'
 
 const RADIUS = 54
@@ -22,6 +22,7 @@ export function Countdown({ onFinalTick }: { onFinalTick?: (seconds: number) => 
 
   useEffect(() => {
     expiredSentRef.current = false
+    if (timer.status !== 'running') return
     let frame = 0
 
     // Backup for skjulte faner: rAF stopper der, men setInterval kjører
@@ -93,6 +94,59 @@ export function Countdown({ onFinalTick }: { onFinalTick?: (seconds: number) => 
         {Math.ceil(remainingMs(timer) / 1000)}
       </span>
       {timer.status === 'paused' && <span className={styles.pausedBadge}>PAUSE</span>}
+    </div>
+  )
+}
+
+export function AnswerWindowCountdown() {
+  const { actorRef, send } = useGame()
+  const timer = useSelector(actorRef, (s) => s.context.answerWindowTimer ?? idleTimer)
+  const [seconds, setSeconds] = useState(() => Math.ceil(remainingMs(timer) / 1000))
+  const expiredSentRef = useRef(false)
+
+  useEffect(() => {
+    expiredSentRef.current = false
+    let frame = 0
+
+    function paint() {
+      const ms = remainingMs(timer)
+      const nextSeconds = Math.max(0, Math.ceil(ms / 1000))
+      setSeconds((current) => (current === nextSeconds ? current : nextSeconds))
+
+      if (ms <= 0) {
+        if (!expiredSentRef.current) {
+          expiredSentRef.current = true
+          send({ type: 'ANSWER_WINDOW_EXPIRED' })
+        }
+        return
+      }
+      frame = requestAnimationFrame(paint)
+    }
+
+    const expiryBackup = window.setInterval(() => {
+      if (remainingMs(timer) <= 0 && !expiredSentRef.current) {
+        expiredSentRef.current = true
+        send({ type: 'ANSWER_WINDOW_EXPIRED' })
+      }
+    }, 500)
+    paint()
+
+    return () => {
+      cancelAnimationFrame(frame)
+      window.clearInterval(expiryBackup)
+    }
+  }, [timer, send])
+
+  if (timer.status !== 'running') return null
+
+  return (
+    <div className={styles.answerWindow} role="timer" aria-live="polite">
+      <span className={styles.answerWindowLabel}>Avgi svar</span>
+      {seconds > 0 && (
+        <span key={seconds} className={styles.answerWindowNumber}>
+          {seconds}
+        </span>
+      )}
     </div>
   )
 }

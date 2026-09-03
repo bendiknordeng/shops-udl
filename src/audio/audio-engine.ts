@@ -1,7 +1,14 @@
 import { Howl, Howler } from 'howler'
 import type { AudioMedia } from '../content/schemas'
 
-export type AudioEngineStatus = 'idle' | 'loading' | 'ready' | 'playing' | 'paused' | 'error'
+export type AudioEngineStatus =
+  | 'idle'
+  | 'loading'
+  | 'ready'
+  | 'playing'
+  | 'paused'
+  | 'ended'
+  | 'error'
 
 export type AudioEngineState = {
   status: AudioEngineStatus
@@ -37,6 +44,7 @@ class AudioEngine {
   private analyser: AnalyserNode | null = null
   private loadGeneration = 0
   private retryTimeout: number | null = null
+  private clipEndTimeout: number | null = null
 
   subscribe(listener: Listener): () => void {
     this.listeners.add(listener)
@@ -141,7 +149,7 @@ class AudioEngine {
       },
       onend: () => {
         if (this.loadGeneration !== generation) return
-        this.setState({ status: 'paused' })
+        this.finishNaturalPlayback()
       },
     })
   }
@@ -156,6 +164,7 @@ class AudioEngine {
     if (!this.howl || !this.media) return
     if (this.state.status === 'playing') return
     if (this.state.status === 'loading' || this.state.status === 'error') return
+    this.clearClipEndTimeout()
     const fadeIn = this.media.fadeInMs
     this.howl.play()
     if (fadeIn > 0 && this.state.status === 'ready') {
@@ -169,6 +178,7 @@ class AudioEngine {
 
   pause() {
     if (!this.howl || this.state.status !== 'playing') return
+    this.clearClipEndTimeout()
     this.howl.pause()
     this.setState({ status: 'paused' })
     this.storePosition()
@@ -177,12 +187,14 @@ class AudioEngine {
 
   toggle() {
     if (this.state.status === 'playing') this.pause()
+    else if (this.state.status === 'ended') this.restart()
     else this.play()
   }
 
   /** Start klippet på nytt fra konfigurert startpunkt. */
   restart() {
     if (!this.howl || !this.media) return
+    this.clearClipEndTimeout()
     this.howl.stop()
     this.howl.seek(this.media.startAtSeconds)
     this.clearStoredPosition()
@@ -196,7 +208,8 @@ class AudioEngine {
   seekBy(deltaSeconds: number) {
     if (!this.howl || !this.media) return
     const current = Number(this.howl.seek()) || 0
-    const target = Math.max(this.media.startAtSeconds, current + deltaSeconds)
+    const end = this.media.endAtSeconds ?? this.howl.duration()
+    const target = Math.min(end, Math.max(this.media.startAtSeconds, current + deltaSeconds))
     this.howl.seek(target)
   }
 
@@ -204,6 +217,7 @@ class AudioEngine {
   fadeOutAndStop(ms = 500) {
     const howl = this.howl
     if (!howl) return
+    this.clearClipEndTimeout()
     if (this.state.status === 'playing') {
       howl.fade(howl.volume(), 0, ms)
       window.setTimeout(() => {
@@ -218,6 +232,7 @@ class AudioEngine {
 
   unload() {
     this.loadGeneration += 1
+    this.clearClipEndTimeout()
     if (this.retryTimeout !== null) {
       window.clearTimeout(this.retryTimeout)
       this.retryTimeout = null
@@ -260,12 +275,17 @@ class AudioEngine {
         const fadeOut = this.media.fadeOutMs
         if (fadeOut > 0) {
           this.howl.fade(this.howl.volume(), 0, fadeOut)
-          window.setTimeout(() => {
-            this.pause()
+          this.clearClipEndTimeout()
+          this.clipEndTimeout = window.setTimeout(() => {
+            this.clipEndTimeout = null
+            if (this.state.status !== 'playing') return
+            this.howl?.pause()
             this.howl?.volume(this.effectiveVolume())
+            this.finishNaturalPlayback()
           }, fadeOut)
         } else {
-          this.pause()
+          this.howl.pause()
+          this.finishNaturalPlayback()
         }
         this.stopWatcher()
         return
@@ -278,6 +298,19 @@ class AudioEngine {
     if (this.watchInterval !== null) {
       window.clearInterval(this.watchInterval)
       this.watchInterval = null
+    }
+  }
+
+  private finishNaturalPlayback() {
+    this.storePosition()
+    this.stopWatcher()
+    this.setState({ status: 'ended' })
+  }
+
+  private clearClipEndTimeout() {
+    if (this.clipEndTimeout !== null) {
+      window.clearTimeout(this.clipEndTimeout)
+      this.clipEndTimeout = null
     }
   }
 

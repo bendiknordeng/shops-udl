@@ -2,9 +2,21 @@ import { assign, setup } from 'xstate'
 import type { GamePack } from '../content/schemas'
 import type { GameEvent } from './game-events'
 import type { GameContext, Team } from './types'
-import { expireTimer, idleTimer, pauseTimer, resumeTimer, startTimer, stopTimer } from './timer'
+import {
+  adjustTimer,
+  expireTimer,
+  idleTimer,
+  pauseTimer,
+  resumeTimer,
+  startTimer,
+  stopTimer,
+} from './timer'
 
 const normalize = (name: string) => name.trim().toLocaleLowerCase('nb-NO')
+
+export const DEFAULT_ANSWER_WINDOW_SECONDS = 10
+export const MIN_ANSWER_WINDOW_SECONDS = 1
+export const MAX_ANSWER_WINDOW_SECONDS = 30
 
 export function createInitialContext(pack: GamePack): GameContext {
   return {
@@ -12,6 +24,7 @@ export function createInitialContext(pack: GamePack): GameContext {
     packVersion: pack.version,
     teamCount: pack.manualTeams ? pack.manualTeams.length : Math.min(...pack.allowedTeamCounts),
     answerSeconds: pack.defaultAnswerSeconds,
+    answerWindowSeconds: DEFAULT_ANSWER_WINDOW_SECONDS,
     teams: [],
     manualAllocation: false,
     activeTeamIndex: 0,
@@ -20,6 +33,7 @@ export function createInitialContext(pack: GamePack): GameContext {
     clueResults: {},
     activeClueId: null,
     timer: idleTimer,
+    answerWindowTimer: idleTimer,
     revealed: false,
     mediaHidden: false,
     mediaError: null,
@@ -61,9 +75,17 @@ export function createGameMachine(pack: GamePack) {
         if (context.usedClueIds.includes(event.clueId)) return false
         return findClue(pack, event.clueId) !== null
       },
+      usedClueAvailable: ({ context, event }) => {
+        if (event.type !== 'OPEN_USED_CLUE') return false
+        if (!context.usedClueIds.includes(event.clueId)) return false
+        return findClue(pack, event.clueId) !== null
+      },
       allCluesUsed: ({ context }) => context.usedClueIds.length >= pack.clues.length,
       teamExists: ({ context, event }) =>
         event.type === 'AWARD_CLUE' && context.teams.some((t) => t.id === event.teamId),
+      activeClueHasAward: ({ context }) =>
+        context.lastOutcome?.kind === 'award' &&
+        context.lastOutcome.clueId === context.activeClueId,
     },
     actions: {
       applyAward: assign(({ context, event }) => {
@@ -79,6 +101,7 @@ export function createGameMachine(pack: GamePack) {
           },
           lastOutcome: { kind: 'award', teamId: event.teamId, clueId: clue.id, value: clue.value } as const,
           timer: stopTimer(context.timer),
+          answerWindowTimer: stopTimer(context.answerWindowTimer ?? idleTimer),
         }
       }),
       applyNoCorrect: assign(({ context }) => {
@@ -92,11 +115,27 @@ export function createGameMachine(pack: GamePack) {
           },
           lastOutcome: { kind: 'none', clueId: clue.id } as const,
           timer: stopTimer(context.timer),
+          answerWindowTimer: stopTimer(context.answerWindowTimer ?? idleTimer),
+        }
+      }),
+      resetClueAward: assign(({ context }) => {
+        const outcome = context.lastOutcome
+        if (outcome?.kind !== 'award' || outcome.clueId !== context.activeClueId) return {}
+        const clueResults = { ...(context.clueResults ?? {}) }
+        delete clueResults[outcome.clueId]
+        return {
+          teams: applyAwardToTeams(context.teams, outcome.teamId, -outcome.value),
+          usedClueIds: context.usedClueIds.filter((id) => id !== outcome.clueId),
+          clueResults,
+          lastOutcome: null,
+          timer: stopTimer(context.timer),
+          answerWindowTimer: idleTimer,
         }
       }),
       clearClue: assign({
         activeClueId: null,
         timer: idleTimer,
+        answerWindowTimer: idleTimer,
         revealed: false,
         mediaHidden: false,
         mediaError: null,
@@ -109,7 +148,12 @@ export function createGameMachine(pack: GamePack) {
       }),
       beginCountdown: assign({
         timer: ({ context }) => startTimer(context.answerSeconds),
+        answerWindowTimer: idleTimer,
         mediaError: null,
+      }),
+      beginAnswerWindow: assign({
+        answerWindowTimer: ({ context }) =>
+          startTimer(context.answerWindowSeconds ?? DEFAULT_ANSWER_WINDOW_SECONDS),
       }),
       setClueUsed: assign(({ context, event }) => {
         if (event.type !== 'SET_CLUE_USED') return {}
@@ -135,6 +179,15 @@ export function createGameMachine(pack: GamePack) {
             Math.min(
               pack.presentation.maxAnswerSeconds,
               Math.max(pack.presentation.minAnswerSeconds, event.seconds),
+            ),
+        }),
+      },
+      SET_ANSWER_WINDOW_SECONDS: {
+        actions: assign({
+          answerWindowSeconds: ({ event }) =>
+            Math.min(
+              MAX_ANSWER_WINDOW_SECONDS,
+              Math.max(MIN_ANSWER_WINDOW_SECONDS, event.seconds),
             ),
         }),
       },
@@ -229,6 +282,21 @@ export function createGameMachine(pack: GamePack) {
             actions: assign({
               activeClueId: ({ event }) => (event.type === 'OPEN_CLUE' ? event.clueId : null),
               timer: idleTimer,
+              answerWindowTimer: idleTimer,
+              revealed: false,
+              mediaHidden: false,
+              mediaError: null,
+              lastOutcome: null,
+            }),
+          },
+          OPEN_USED_CLUE: {
+            guard: 'usedClueAvailable',
+            target: '#quiz.clue.review',
+            actions: assign({
+              activeClueId: ({ event }) =>
+                event.type === 'OPEN_USED_CLUE' ? event.clueId : null,
+              timer: idleTimer,
+              answerWindowTimer: idleTimer,
               revealed: false,
               mediaHidden: false,
               mediaError: null,
@@ -281,28 +349,66 @@ export function createGameMachine(pack: GamePack) {
                 guard: ({ context }) => context.timer.status === 'paused',
                 actions: assign({ timer: ({ context }) => resumeTimer(context.timer) }),
               },
+              ADJUST_COUNTDOWN: {
+                actions: assign({
+                  timer: ({ context, event }) => adjustTimer(context.timer, event.deltaSeconds),
+                }),
+              },
+              RESTART_CLUE: { actions: 'beginCountdown' },
               COUNTDOWN_EXPIRED: {
                 guard: ({ context }) => context.timer.status === 'running',
-                target: 'open',
-                actions: assign({ timer: ({ context }) => expireTimer(context.timer) }),
+                target: 'answerDelay',
+                actions: assign({
+                  timer: ({ context }) => expireTimer(context.timer),
+                  answerWindowTimer: idleTimer,
+                }),
               },
               OPEN_ANSWER_PHASE: {
-                target: 'open',
-                actions: assign({ timer: ({ context }) => stopTimer(context.timer) }),
+                target: 'answerDelay',
+                actions: assign({
+                  timer: ({ context }) => stopTimer(context.timer),
+                  answerWindowTimer: idleTimer,
+                }),
               },
               AWARD_CLUE: { guard: 'teamExists', target: 'decided', actions: 'applyAward' },
               NO_CORRECT_ANSWER: { target: 'decided', actions: 'applyNoCorrect' },
             },
           },
+          // Fast scenepause før «Avgi svar» vises og nedtellingen starter.
+          answerDelay: {
+            after: {
+              2000: { target: 'open', actions: 'beginAnswerWindow' },
+            },
+          },
           // Åpen svarfase — verten styrer de andre lagene muntlig.
           open: {
             on: {
+              RESTART_CLUE: { target: 'active', actions: 'beginCountdown' },
+              ANSWER_WINDOW_EXPIRED: {
+                guard: ({ context }) => context.answerWindowTimer?.status === 'running',
+                actions: assign({
+                  answerWindowTimer: ({ context }) =>
+                    expireTimer(context.answerWindowTimer ?? idleTimer),
+                }),
+              },
+              ADJUST_COUNTDOWN: {
+                guard: ({ context }) => context.answerWindowTimer?.status === 'running',
+                actions: assign({
+                  answerWindowTimer: ({ context, event }) =>
+                    adjustTimer(context.answerWindowTimer ?? idleTimer, event.deltaSeconds),
+                }),
+              },
               AWARD_CLUE: { guard: 'teamExists', target: 'decided', actions: 'applyAward' },
               NO_CORRECT_ANSWER: { target: 'decided', actions: 'applyNoCorrect' },
             },
           },
           decided: {
             on: {
+              RESET_CLUE_AWARD: {
+                guard: 'activeClueHasAward',
+                target: 'answerDelay',
+                actions: 'resetClueAward',
+              },
               RETURN_TO_BOARD: [
                 {
                   guard: 'allCluesUsed',
@@ -311,6 +417,14 @@ export function createGameMachine(pack: GamePack) {
                 },
                 { target: '#quiz.board', actions: ['advanceTurn', 'clearClue'] },
               ],
+            },
+          },
+          review: {
+            on: {
+              CLOSE_CLUE_REVIEW: {
+                target: '#quiz.board',
+                actions: 'clearClue',
+              },
             },
           },
         },

@@ -31,6 +31,7 @@ export type GameContext = {
   packVersion: string
   teamCount: number
   answerSeconds: number
+  answerWindowSeconds: number
   teams: Team[]
   /** true når lagene kommer fra manualTeams i spillpakken. */
   manualAllocation: boolean
@@ -41,6 +42,7 @@ export type GameContext = {
   clueResults: Record<string, ClueResult>
   activeClueId: string | null
   timer: TimerState
+  answerWindowTimer: TimerState
   revealed: boolean
   mediaHidden: boolean
   mediaError: string | null

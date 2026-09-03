@@ -74,16 +74,16 @@
   gap: 12px;
   padding: 12px 14px;
   color: var(--ink-warm);
-  background: linear-gradient(100deg, rgba(255, 182, 40, 0.2), rgba(255, 182, 40, 0.06));
-  border: 2px solid var(--gold);
+  background: linear-gradient(100deg, rgb(var(--team-color-rgb) / 0.22), rgb(var(--team-color-rgb) / 0.06));
+  border: 2px solid var(--team-color);
   border-radius: var(--radius-m);
-  box-shadow: 0 0 22px rgba(255, 182, 40, 0.18);
+  box-shadow: 0 0 22px rgb(var(--team-color-rgb) / 0.22);
 }
 
 .activeTurnCardLabel {
   padding: 4px 9px;
-  color: var(--bg-void);
-  background: linear-gradient(180deg, var(--gold), var(--gold-deep));
+  color: var(--team-contrast);
+  background: var(--team-color);
   border-radius: 999px;
   font-size: 10px;
   font-weight: 800;
@@ -195,14 +195,16 @@
   gap: 8px;
   padding: 6px 10px;
   border-radius: var(--radius-s);
-  background: rgba(0, 0, 0, 0.28);
+  color: var(--team-color);
+  background: linear-gradient(90deg, rgb(var(--team-color-rgb) / 0.13), rgba(0, 0, 0, 0.28));
+  border-left: 3px solid var(--team-color);
 }
 
 .teamRowActive {
-  color: var(--ink-warm);
-  background: rgba(255, 182, 40, 0.12);
-  outline: 2px solid var(--gold);
-  box-shadow: 0 0 14px rgba(255, 182, 40, 0.12);
+  color: var(--team-color);
+  background: rgb(var(--team-color-rgb) / 0.18);
+  outline: 2px solid var(--team-color);
+  box-shadow: 0 0 14px rgb(var(--team-color-rgb) / 0.18);
 }
 
 .teamRowName {
@@ -216,7 +218,7 @@
 .teamRowScore {
   font-family: var(--font-display);
   font-size: 18px;
-  color: var(--gold);
+  color: var(--team-color);
   min-width: 44px;
   text-align: right;
 }
@@ -226,10 +228,22 @@
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--bg-void);
-  background: linear-gradient(180deg, var(--gold), var(--gold-deep));
+  color: var(--team-contrast);
+  background: var(--team-color);
   border-radius: 999px;
   padding: 2px 7px;
+}
+
+.teamButton {
+  color: var(--team-color);
+  background: rgb(var(--team-color-rgb) / 0.13);
+  border-color: rgb(var(--team-color-rgb) / 0.52);
+}
+
+.teamButton:hover:not(:disabled) {
+  border-color: var(--team-color);
+  background: rgb(var(--team-color-rgb) / 0.22);
+  box-shadow: 0 0 14px rgb(var(--team-color-rgb) / 0.2);
 }
 
 .boardGrid {
@@ -250,6 +264,13 @@
   white-space: nowrap;
 }
 
+.boardHeaderCellKeyboardHighlighted {
+  color: var(--gold);
+  text-shadow: 0 0 12px rgba(255, 182, 40, 0.55);
+  animation: remoteKeyboardGoldSweep 360ms var(--ease-stage) both;
+  animation-delay: calc(var(--keyboard-step, 0) * 60ms);
+}
+
 .boardCell {
   padding: 7px 2px;
   border-radius: var(--radius-s);
@@ -262,6 +283,42 @@
 
 .boardCell:hover:not(:disabled) {
   border-color: var(--gold);
+}
+
+.boardCellUsed {
+  color: var(--ink-faint);
+  text-decoration: line-through;
+}
+
+.boardCell.boardCellKeyboardHighlighted {
+  border-color: var(--gold);
+  box-shadow:
+    inset 0 0 14px rgba(255, 182, 40, 0.22),
+    0 0 12px rgba(255, 182, 40, 0.36);
+  animation: remoteKeyboardGoldSweep 360ms var(--ease-stage) both;
+  animation-delay: calc(var(--keyboard-step, 0) * 60ms);
+}
+
+@keyframes remoteKeyboardGoldSweep {
+  0% {
+    border-color: rgba(255, 182, 40, 0.08);
+    box-shadow: none;
+    filter: brightness(0.72) saturate(0.7);
+  }
+  55% {
+    border-color: #ffe18a;
+    box-shadow:
+      inset 0 0 18px rgba(255, 213, 102, 0.34),
+      0 0 16px rgba(255, 182, 40, 0.5);
+    filter: brightness(1.18) saturate(1.14);
+  }
+  100% {
+    border-color: var(--gold);
+    box-shadow:
+      inset 0 0 14px rgba(255, 182, 40, 0.22),
+      0 0 12px rgba(255, 182, 40, 0.36);
+    filter: brightness(1.05) saturate(1.08);
+  }
 }
 
 .boardCell:disabled {

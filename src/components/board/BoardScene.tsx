@@ -3,13 +3,15 @@ import { useSelector } from '@xstate/react'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { useGame } from '../../app/GameProvider'
+import type { BoardKeyboardSelection } from '../../app/useHotkeys'
 import { sceneBus } from '../../app/scene-bus'
 import { dur } from '../../app/motion'
 import { boardColumns } from '../../game/selectors'
+import { teamColorStyle } from '../../game/team-colors'
 import { TypeIcon, TypeLegend, TYPE_LABELS } from '../common/TypeIcon'
 import styles from './board.module.css'
 
-export function BoardScene() {
+export function BoardScene({ keyboardSelection }: { keyboardSelection: BoardKeyboardSelection | null }) {
   const { pack, actorRef, send } = useGame()
   const context = useSelector(actorRef, (s) => s.context)
   const isStarting = useSelector(actorRef, (s) => s.matches('startingGame'))
@@ -54,8 +56,12 @@ export function BoardScene() {
     { scope: boardRef, dependencies: [isStarting] },
   )
 
-  function openClue(clueId: string, element: HTMLElement) {
+  function openClue(clueId: string, used: boolean, element: HTMLElement) {
     sceneBus.lastTileRect = element.getBoundingClientRect()
+    if (used) {
+      send({ type: 'OPEN_USED_CLUE', clueId })
+      return
+    }
     send({ type: 'OPEN_CLUE', clueId })
   }
 
@@ -79,15 +85,32 @@ export function BoardScene() {
   return (
     <div ref={boardRef} className={styles.board}>
       <div className={styles.grid} style={{ gridTemplateColumns: `repeat(${columns.length}, 1fr)` }}>
-        {columns.map(({ category, cells }) => (
+        {columns.map(({ category, cells }, columnIndex) => (
           <div key={category.id} className={styles.column}>
-            <div className={styles.categoryHeader}>{category.title}</div>
-            {cells.map(({ value, clue, used }) => {
+            <div
+              className={`${styles.categoryHeader} ${keyboardSelection?.mode === 'column' && keyboardSelection.index === columnIndex ? styles.categoryHeaderKeyboardHighlighted : ''}`}
+              style={keyboardSelection?.mode === 'column' && keyboardSelection.index === columnIndex ? ({ '--keyboard-step': 0 } as React.CSSProperties) : undefined}
+            >
+              {category.title}
+            </div>
+            {cells.map(({ value, clue, used }, rowIndex) => {
+              const keyboardHighlighted =
+                (keyboardSelection?.mode === 'column' && keyboardSelection.index === columnIndex) ||
+                (keyboardSelection?.mode === 'row' && keyboardSelection.index === rowIndex)
+              let keyboardStep = columnIndex
+              if (keyboardSelection?.mode === 'column') keyboardStep = rowIndex + 1
               const result = clue ? context.clueResults?.[clue.id] : undefined
               const awardedTeam =
                 result?.kind === 'award'
                   ? (context.teams.find((team) => team.id === result.teamId) ?? null)
                   : null
+              const awardedTeamIndex = awardedTeam
+                ? context.teams.findIndex((team) => team.id === awardedTeam.id)
+                : -1
+              const tileStyle = awardedTeam ? { ...teamColorStyle(awardedTeamIndex) } : {}
+              if (keyboardHighlighted) {
+                Object.assign(tileStyle, { '--keyboard-step': keyboardStep })
+              }
               let ariaLabel = 'Tom rute'
               if (clue) ariaLabel = `${category.title} ${value} poeng, ${TYPE_LABELS[clue.type]}`
               if (clue && used) ariaLabel = `${ariaLabel}. Fasit: ${clue.answer}`
@@ -98,10 +121,11 @@ export function BoardScene() {
                 <button
                   key={`${category.id}-${value}`}
                   type="button"
-                  className={`${styles.tile} ${used ? styles.tileUsed : ''}`}
+                  className={`${styles.tile} ${used ? styles.tileUsed : ''} ${used && clue?.media.kind === 'audio' ? styles.tileUsedAudio : ''} ${keyboardHighlighted ? styles.tileKeyboardHighlighted : ''}`}
+                  style={tileStyle}
                   data-clue-id={clue?.id}
-                  disabled={used || !clue}
-                  onClick={(e) => clue && openClue(clue.id, e.currentTarget)}
+                  disabled={!clue}
+                  onClick={(e) => clue && openClue(clue.id, used, e.currentTarget)}
                   onPointerMove={handleTilePointer}
                   onPointerLeave={resetTilePointer}
                   aria-label={ariaLabel}

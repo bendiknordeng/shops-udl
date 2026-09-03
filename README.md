@@ -76,8 +76,10 @@ Implementert slik — endres i `game-pack.ts` / `game-machine.ts` ved behov:
 
 Dock nederst (kan foldes sammen). Poengtildeling krever alltid bekreftelse.
 Snarveier: `Mellomrom` spill/pause lyd · `K` pause/fortsett tid · `O` åpen
-svarfase · `F` fasit · `M` skjul/vis bilde · `B` til brettet · `U` angre ·
-`Esc` hopp over animasjon.
+svarfase · `F` fasit · `M` skjul/vis bilde · `B` til brettet · `R` trekk
+tilbake poeng på aktiv rute · `U` angre · `Esc` hopp over animasjon.
+På brettet velger `1–5` først akse og deretter rute. `'` bytter mellom
+kolonne- og radmodus; `X` eller `Esc` fjerner markeringen.
 
 ### Privat vertsvindu (for skjermdeling)
 

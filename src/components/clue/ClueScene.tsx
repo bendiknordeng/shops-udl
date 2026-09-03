@@ -7,14 +7,15 @@ import { sceneBus } from '../../app/scene-bus'
 import { dur } from '../../app/motion'
 import { audioEngine, type AudioEngineState } from '../../audio/audio-engine'
 import { getCategory, getClue } from '../../game/selectors'
+import { teamColorStyle } from '../../game/team-colors'
 import { TypeIcon, TYPE_LABELS } from '../common/TypeIcon'
-import { Countdown } from '../timer/Countdown'
+import { AnswerWindowCountdown, Countdown } from '../timer/Countdown'
 import { Visualizer } from './Visualizer'
 import { PlaybackProgress } from './PlaybackProgress'
 import { AnswerReveal } from './AnswerReveal'
 import styles from './clue.module.css'
 
-type CluePhase = 'presenting' | 'ready' | 'active' | 'open' | 'decided'
+type CluePhase = 'presenting' | 'ready' | 'active' | 'answerDelay' | 'open' | 'decided' | 'review'
 
 export function ClueScene() {
   const { pack, actorRef, send } = useGame()
@@ -27,7 +28,9 @@ export function ClueScene() {
   if (snapshot.matches({ clue: 'presenting' })) phase = 'presenting'
   else if (snapshot.matches({ clue: 'ready' })) phase = 'ready'
   else if (snapshot.matches({ clue: 'active' })) phase = 'active'
+  else if (snapshot.matches({ clue: 'answerDelay' })) phase = 'answerDelay'
   else if (snapshot.matches({ clue: 'open' })) phase = 'open'
+  else if (snapshot.matches({ clue: 'review' })) phase = 'review'
 
   const stageRef = useRef<HTMLDivElement>(null)
   const flashRef = useRef<HTMLDivElement>(null)
@@ -41,6 +44,7 @@ export function ClueScene() {
   // Fasiten holdes montert til utgangsanimasjonen er ferdig.
   const [revealMounted, setRevealMounted] = useState(context.revealed)
   const audioStartedRef = useRef(false)
+  const previousAudioStatusRef = useRef(audioEngine.getState().status)
   const exitingRef = useRef(false)
 
   const chooserTeam = context.teams[context.activeTeamIndex] ?? null
@@ -119,14 +123,25 @@ export function ClueScene() {
   // Lydmotorens status → UI + maskinen.
   useEffect(() => {
     const unsubscribe = audioEngine.subscribe((state) => {
+      const previousStatus = previousAudioStatusRef.current
+      previousAudioStatusRef.current = state.status
       setAudioState(state)
       if (state.status === 'ready') setMediaReady(true)
       if (state.status === 'error' && state.error) {
         send({ type: 'MEDIA_FAILED', message: state.error })
       }
+      const current = actorRef.getSnapshot()
+      if (current.matches({ clue: 'active' })) {
+        if (previousStatus === 'playing' && state.status === 'paused' && current.context.timer.status === 'running') {
+          send({ type: 'PAUSE_COUNTDOWN' })
+        }
+        if (previousStatus === 'paused' && state.status === 'playing' && current.context.timer.status === 'paused') {
+          send({ type: 'RESUME_COUNTDOWN' })
+        }
+      }
     })
     return unsubscribe
-  }, [send])
+  }, [actorRef, send])
 
   // Svarfasen starter når presentasjonen er klar (entré + media).
   useEffect(() => {
@@ -135,19 +150,28 @@ export function ClueScene() {
     }
   }, [phase, entranceDone, mediaReady, context.mediaError, send])
 
-  // Lyd og nedtelling starter koordinert.
+  // Lyd og nedtelling starter koordinert. Brukt-ruter spiller fra start uten timer.
   useEffect(() => {
-    if (phase === 'active' && clue?.media.kind === 'audio' && !audioStartedRef.current) {
+    if (
+      (phase === 'active' || phase === 'review') &&
+      clue?.media.kind === 'audio' &&
+      !audioStartedRef.current
+    ) {
       if (audioState.status === 'ready' || audioState.status === 'paused') {
         audioStartedRef.current = true
-        audioEngine.play()
+        if (phase === 'review') audioEngine.restart()
+        else audioEngine.play()
       }
     }
   }, [phase, clue, audioState.status])
 
   // Utløpt svartid fryser sangen på gjeldende posisjon.
   useEffect(() => {
-    if (phase === 'open' && context.timer.status === 'expired' && clue?.media.kind === 'audio') {
+    if (
+      (phase === 'answerDelay' || phase === 'open') &&
+      context.timer.status === 'expired' &&
+      clue?.media.kind === 'audio'
+    ) {
       audioEngine.pause()
     }
   }, [phase, context.timer.status, clue])
@@ -155,7 +179,7 @@ export function ClueScene() {
   // Tidsutløp: scenen fryser tydelig uten å skjule media.
   useGSAP(
     () => {
-      if (phase === 'open' && context.timer.status === 'expired' && flashRef.current) {
+      if (phase === 'answerDelay' && context.timer.status === 'expired' && flashRef.current) {
         gsap.fromTo(
           flashRef.current,
           { opacity: 0.55 },
@@ -208,7 +232,10 @@ export function ClueScene() {
     audioEngine.fadeOutAndStop(400)
     const el = stageRef.current
     const from = sceneBus.lastTileRect
-    const finish = () => send({ type: 'RETURN_TO_BOARD' })
+    const finish = () => {
+      if (phase === 'review') send({ type: 'CLOSE_CLUE_REVIEW' })
+      else send({ type: 'RETURN_TO_BOARD' })
+    }
     if (!el || !from) {
       finish()
       return
@@ -256,18 +283,35 @@ export function ClueScene() {
 
   if (!clue || !category) return null
 
+  const reviewResult = context.clueResults?.[clue.id]
+  let reviewOutcome = 'Ingen poengtildeling registrert'
+  if (reviewResult?.kind === 'none') reviewOutcome = 'Ingen fikk poeng'
+  if (reviewResult?.kind === 'award') {
+    const team = context.teams.find((candidate) => candidate.id === reviewResult.teamId)
+    reviewOutcome = team
+      ? `${team.name} fikk ${clue.value} poeng`
+      : `${clue.value} poeng ble delt ut`
+  }
+
   let phaseLabel = 'Ingen fikk riktig'
   if (phase === 'presenting') phaseLabel = 'Gjør klar …'
-  else if (phase === 'ready') phaseLabel = 'Gjør dere klare'
+  else if (phase === 'ready') phaseLabel = ''
   else if (phase === 'active') phaseLabel = `Svarfase — ${chooserTeam?.name ?? ''}`
+  else if (phase === 'answerDelay') phaseLabel = ''
   else if (phase === 'open') phaseLabel = ''
+  else if (phase === 'review') phaseLabel = `Fasit: ${clue.answer} · ${reviewOutcome}`
   else if (context.lastOutcome?.kind === 'award') phaseLabel = 'Poeng delt ut'
 
-  const showMediaError = Boolean(context.mediaError) && phase === 'presenting'
+  const showMediaError =
+    Boolean(context.mediaError) && (phase === 'presenting' || phase === 'review')
   const awardOutcome = context.lastOutcome?.kind === 'award' ? context.lastOutcome : null
   const awardedTeam = awardOutcome
     ? (context.teams.find((t) => t.id === awardOutcome.teamId) ?? null)
     : null
+  const awardedTeamIndex = awardedTeam
+    ? context.teams.findIndex((team) => team.id === awardedTeam.id)
+    : -1
+  const awardedTeamStyle = awardedTeam ? teamColorStyle(awardedTeamIndex) : undefined
 
   let mediaContent = (
     <div className={styles.audioStage}>
@@ -295,17 +339,19 @@ export function ClueScene() {
           >
             Prøv igjen
           </button>
-          <button
-            type="button"
-            className="stageButton stageButton--ghost stageButton--small"
-            onClick={() => send({ type: 'SKIP_MEDIA' })}
-          >
-            Hopp til svarfase
-          </button>
+          {phase === 'presenting' && (
+            <button
+              type="button"
+              className="stageButton stageButton--ghost stageButton--small"
+              onClick={() => send({ type: 'SKIP_MEDIA' })}
+            >
+              Hopp til svarfase
+            </button>
+          )}
         </div>
       </div>
     )
-  } else if (phase === 'presenting') {
+  } else if (phase === 'presenting' || (phase === 'review' && !mediaReady)) {
     mediaContent = (
       <div className={styles.loadingPanel}>
         <div className={styles.spinner} />
@@ -359,22 +405,32 @@ export function ClueScene() {
         </div>
       )}
 
+      {phase === 'open' && context.answerWindowTimer?.status === 'running' && (
+        <div className={styles.answerWindowRow}>
+          <AnswerWindowCountdown />
+        </div>
+      )}
+
       <div className={styles.body}>
         <div ref={flashRef} className={styles.expiredFlash} />
 
         {mediaContent}
 
-        {phase !== 'presenting' && phase !== 'ready' && (
+        {phase === 'active' && (
           <div className={styles.timerSlot}>
             <Countdown onFinalTick={flashFinalSecond} />
           </div>
         )}
+
       </div>
 
       {phase === 'decided' && (
         <div className={styles.outcomeBanner}>
           {awardOutcome ? (
-            <span className={styles.outcomeTitle}>
+            <span
+              className={`${styles.outcomeTitle} ${styles.outcomeTitleAwarded}`}
+              style={awardedTeamStyle}
+            >
               +{awardOutcome.value} til {awardedTeam?.name}
             </span>
           ) : (
@@ -395,7 +451,7 @@ export function ClueScene() {
         </div>
       )}
 
-      {phase === 'decided' && (
+      {(phase === 'decided' || phase === 'review') && (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <button type="button" className="stageButton" onClick={handleReturnToBoard}>
             Til brettet
@@ -403,7 +459,11 @@ export function ClueScene() {
         </div>
       )}
 
-      <div ref={chipRef} className={styles.awardChip} style={{ opacity: 0 }}>
+      <div
+        ref={chipRef}
+        className={styles.awardChip}
+        style={{ opacity: 0, ...awardedTeamStyle }}
+      >
         +{clue.value}
       </div>
     </div>

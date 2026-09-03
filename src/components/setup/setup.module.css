@@ -161,14 +161,16 @@
 }
 
 .teamCard {
-  background: var(--tile-face);
-  border: 1px solid var(--tile-edge);
+  background:
+    linear-gradient(145deg, rgb(var(--team-color-rgb) / 0.22), transparent 60%),
+    var(--tile-face);
+  border: 1px solid rgb(var(--team-color-rgb) / 0.64);
   border-radius: var(--radius-l);
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  box-shadow: var(--shadow-tile);
+  box-shadow: var(--shadow-tile), 0 0 22px rgb(var(--team-color-rgb) / 0.12);
   position: relative;
   overflow: hidden;
 }
@@ -177,7 +179,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: var(--spotlight);
+  background: radial-gradient(circle at 50% 0%, rgb(var(--team-color-rgb) / 0.2), transparent 70%);
   pointer-events: none;
 }
 
@@ -187,7 +189,7 @@
   right: 14px;
   font-family: var(--font-display);
   font-size: 15px;
-  color: var(--ink-faint);
+  color: var(--team-color);
   letter-spacing: 0.1em;
 }
 
@@ -196,7 +198,7 @@
   font-size: clamp(21px, 2vw, 25px);
   line-height: 1.15;
   letter-spacing: 0.04em;
-  color: var(--ink-warm);
+  color: var(--team-color);
   min-height: 58px;
   padding-right: 48px;
   cursor: text;
@@ -214,7 +216,7 @@
   letter-spacing: 0.04em;
   color: var(--ink-warm);
   background: rgba(0, 0, 0, 0.35);
-  border: 1px solid var(--gold);
+  border: 1px solid var(--team-color);
   border-radius: var(--radius-s);
   padding: 2px 8px;
   width: 100%;
@@ -297,6 +299,14 @@
     rgba(8, 1, 15, 0.97);
 }
 
+.presentationOverlay {
+  background:
+    radial-gradient(circle at 50% 18%, rgb(var(--team-color-rgb) / 0.32), transparent 34%),
+    radial-gradient(circle at 18% 80%, rgb(var(--team-color-rgb) / 0.14), transparent 34%),
+    radial-gradient(circle at 82% 76%, rgb(var(--team-color-rgb) / 0.12), transparent 35%),
+    rgba(8, 1, 15, 0.97);
+}
+
 .presentationOverlay::before {
   content: '';
   position: fixed;
@@ -317,10 +327,10 @@
   background: conic-gradient(
     from 205deg at 50% 0%,
     transparent 0deg,
-    rgba(255, 182, 40, 0.12) 18deg,
+    rgb(var(--team-color-rgb) / 0.16) 18deg,
     transparent 34deg,
     transparent 68deg,
-    rgba(53, 224, 255, 0.1) 88deg,
+    rgb(var(--team-color-rgb) / 0.1) 88deg,
     transparent 108deg
   );
   filter: blur(6px);
@@ -366,7 +376,7 @@
 }
 
 .presentationKicker {
-  color: var(--cyan);
+  color: var(--team-color);
   font-family: var(--font-display);
   font-size: clamp(18px, 2vw, 26px);
   letter-spacing: 0.24em;
@@ -376,14 +386,14 @@
 
 .presentationTeamName {
   max-width: 1200px;
-  color: var(--ink-warm);
+  color: var(--team-color);
   font-family: var(--font-display);
   font-size: clamp(64px, 10vw, 150px);
   letter-spacing: 0.035em;
   line-height: 0.82;
   text-wrap: balance;
   text-shadow:
-    0 0 42px rgba(255, 182, 40, 0.34),
+    0 0 42px rgb(var(--team-color-rgb) / 0.46),
     0 6px 0 rgba(0, 0, 0, 0.48);
   animation: teamNameIn 650ms var(--ease-snap) both;
 }
@@ -403,10 +413,12 @@
   align-items: center;
   gap: 10px;
   padding: 12px 8px;
-  border: 1px solid rgba(255, 233, 194, 0.14);
+  border: 1px solid rgb(var(--team-color-rgb) / 0.38);
   border-radius: var(--radius-l);
   color: var(--ink);
-  background: linear-gradient(160deg, rgba(44, 18, 80, 0.88), rgba(18, 4, 31, 0.86));
+  background:
+    linear-gradient(160deg, rgb(var(--team-color-rgb) / 0.2), transparent 62%),
+    linear-gradient(160deg, rgba(44, 18, 80, 0.88), rgba(18, 4, 31, 0.86));
   box-shadow: var(--shadow-tile);
   font-size: 16px;
   opacity: 0;
@@ -420,13 +432,13 @@
 .presentationMember:hover {
   z-index: 1;
   transform: translateY(-7px) scale(1.04);
-  border-color: var(--gold);
-  box-shadow: var(--shadow-pop), var(--glow-gold);
+  border-color: var(--team-color);
+  box-shadow: var(--shadow-pop), 0 0 26px rgb(var(--team-color-rgb) / 0.34);
 }
 
 .presentationMember > :first-child {
   border-width: 3px;
-  border-color: rgba(255, 182, 40, 0.66);
+  border-color: rgb(var(--team-color-rgb) / 0.72);
 }
 
 .presentationFooter {
@@ -458,7 +470,7 @@
   width: 8px;
   height: 8px;
   border-radius: 999px;
-  background: rgba(255, 233, 194, 0.22);
+  background: rgb(var(--team-color-rgb) / 0.42);
   transition:
     width var(--dur-med) var(--ease-stage),
     background var(--dur-med),
@@ -467,8 +479,8 @@
 
 .presentationDotActive {
   width: 28px;
-  background: var(--gold);
-  box-shadow: var(--glow-gold);
+  background: var(--team-color);
+  box-shadow: 0 0 14px rgb(var(--team-color-rgb) / 0.66);
 }
 
 .avatarOverlay {

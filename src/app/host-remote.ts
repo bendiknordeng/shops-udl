@@ -43,8 +43,10 @@ export type RemotePhase =
   | 'presenting'
   | 'ready'
   | 'active'
+  | 'answerDelay'
   | 'open'
   | 'decided'
+  | 'review'
   | 'summary'
   | 'finale'
 
@@ -58,7 +60,17 @@ export function remotePhase(stateValue: unknown): RemotePhase {
   }
   if (stateValue && typeof stateValue === 'object' && 'clue' in stateValue) {
     const sub = (stateValue as { clue: unknown }).clue
-    if (sub === 'presenting' || sub === 'ready' || sub === 'active' || sub === 'open' || sub === 'decided') return sub
+    if (
+      sub === 'presenting' ||
+      sub === 'ready' ||
+      sub === 'active' ||
+      sub === 'answerDelay' ||
+      sub === 'open' ||
+      sub === 'decided' ||
+      sub === 'review'
+    ) {
+      return sub
+    }
   }
   return 'setup'
 }

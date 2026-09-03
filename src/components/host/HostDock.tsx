@@ -5,6 +5,7 @@ import { audioEngine, type AudioEngineState } from '../../audio/audio-engine'
 import { sceneBus } from '../../app/scene-bus'
 import { openHostWindow } from '../../app/host-remote'
 import { getClue } from '../../game/selectors'
+import { teamColorStyle } from '../../game/team-colors'
 import { SettingsPanel } from './SettingsPanel'
 import styles from './host.module.css'
 
@@ -50,6 +51,7 @@ export function HostDock({ remoteConnected = false }: { remoteConnected?: boolea
 
   const inCluePhase = snapshot.matches('clue')
   const clueReady = snapshot.matches({ clue: 'ready' })
+  const clueReview = snapshot.matches({ clue: 'review' })
   const clueStarted =
     snapshot.matches({ clue: 'active' }) ||
     snapshot.matches({ clue: 'open' }) ||
@@ -72,6 +74,10 @@ export function HostDock({ remoteConnected = false }: { remoteConnected?: boolea
   const canDecide = snapshot.matches({ clue: 'active' }) || snapshot.matches({ clue: 'open' })
   const timerStatus = context.timer.status
   const activeTeam = context.teams[context.activeTeamIndex] ?? null
+  const pendingTeamIndex =
+    pending?.kind === 'award'
+      ? context.teams.findIndex((team) => team.id === pending.teamId)
+      : -1
 
   if (!open) {
     return (
@@ -94,7 +100,11 @@ export function HostDock({ remoteConnected = false }: { remoteConnected?: boolea
         </button>
 
         {activeTeam && (
-          <div className={styles.activeTurn} aria-label={`Tur: ${activeTeam.name}`}>
+          <div
+            className={styles.activeTurn}
+            style={teamColorStyle(context.activeTeamIndex)}
+            aria-label={`Tur: ${activeTeam.name}`}
+          >
             <span className={styles.activeTurnLabel}>Tur</span>
             <strong className={styles.activeTurnName}>{activeTeam.name}</strong>
           </div>
@@ -207,7 +217,10 @@ export function HostDock({ remoteConnected = false }: { remoteConnected?: boolea
           <div className={styles.group}>
             <span className={styles.groupLabel}>Riktig svar</span>
             {pending ? (
-              <div className={styles.confirmBox}>
+              <div
+                className={pending.kind === 'award' ? `${styles.confirmBox} ${styles.confirmBoxTeam}` : styles.confirmBox}
+                style={pending.kind === 'award' ? teamColorStyle(pendingTeamIndex) : undefined}
+              >
                 <span className={styles.confirmLabel}>
                   {pending.kind === 'award'
                     ? `+${clue.value} til ${context.teams.find((t) => t.id === pending.teamId)?.name}?`
@@ -222,11 +235,12 @@ export function HostDock({ remoteConnected = false }: { remoteConnected?: boolea
               </div>
             ) : (
               <div className={styles.awardRow}>
-                {context.teams.map((team) => (
+                {context.teams.map((team, index) => (
                   <button
                     key={team.id}
                     type="button"
-                    className={styles.hostButton}
+                    className={`${styles.hostButton} ${styles.awardTeamButton}`}
+                    style={teamColorStyle(index)}
                     onClick={() => setPending({ kind: 'award', teamId: team.id })}
                   >
                     {team.name}
@@ -257,8 +271,20 @@ export function HostDock({ remoteConnected = false }: { remoteConnected?: boolea
           </div>
         )}
 
+        {clueReview && (
+          <div className={styles.group}>
+            <button
+              type="button"
+              className={`${styles.hostButton} ${styles.hostButtonPrimary}`}
+              onClick={() => send({ type: 'CLOSE_CLUE_REVIEW' })}
+            >
+              Til brettet
+            </button>
+          </div>
+        )}
+
         {/* Avbryt rute uten å bruke den (feilklikk / rekonstruksjon) */}
-        {inCluePhase && !snapshot.matches({ clue: 'decided' }) && (
+        {inCluePhase && !snapshot.matches({ clue: 'decided' }) && !clueReview && (
           <div className={styles.group}>
             <button
               type="button"
