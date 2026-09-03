@@ -112,7 +112,6 @@ Lydposisjon huskes per rute i sessionStorage.
 
 ## Deploy
 
-`.github/workflows/deploy.yml` bygger fra `shops-udl-quiz` og publiserer til
+`.github/workflows/deploy.yml` bygger fra `main` og publiserer til
 GitHub Pages med CNAME `hksplit.no`. Workflowen kjøres **kun manuelt**
-(workflow_dispatch) — den skal ikke aktiveres før domene-cutover. Rollback:
-bytt Pages-kilden tilbake til `main`/docs.
+(workflow_dispatch) — den skal ikke aktiveres før domene-cutover.

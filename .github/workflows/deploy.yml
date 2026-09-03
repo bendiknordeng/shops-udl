@@ -2,7 +2,6 @@
 #
 # BEVISST kun manuell trigger (workflow_dispatch): workflowen skal ikke
 # aktiveres før appen er klar for midlertidig domene-cutover (STACK.md).
-# Rollback: bytt Pages-kilden tilbake til main/docs.
 name: Deploy Shops UDL Quiz
 
 on:
@@ -23,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: shops-udl-quiz
+          ref: main
 
       - uses: pnpm/action-setup@v4
 

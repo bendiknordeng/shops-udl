@@ -441,11 +441,9 @@ Frontend deployment requirements:
 - use `/` as the Vite base because the site has a custom root domain;
 - preserve the custom-domain configuration for `hksplit.no` during temporary
   deployment;
-- deploy only from `shops-udl-quiz` while the temporary app is active;
-- keep the existing `main/docs` site untouched for rollback;
+- deploy only from `main` while the temporary app is active;
 - validate all referenced media during the build;
 - block deployment if the game pack is invalid;
-- switch the Pages source back to `main/docs` for rollback.
 
 The frontend deployment workflow should not be activated until the app is ready
 for the temporary domain cutover.
