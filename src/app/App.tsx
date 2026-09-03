@@ -101,7 +101,7 @@ function MainApp() {
     return (
       <div className={styles.bootScreen}>
         <div className={styles.bootLogo}>
-          SHOPS <span>UDL</span> QUIZ
+          SHOPS <span>UDL</span>
         </div>
         <span className={styles.bootHint}>Rigger scenen …</span>
       </div>
@@ -112,7 +112,7 @@ function MainApp() {
     return (
       <div className={styles.bootScreen}>
         <div className={styles.bootLogo}>
-          SHOPS <span>UDL</span> QUIZ
+          SHOPS <span>UDL</span>
         </div>
         <span className={styles.bootHint}>Spillpakken er ugyldig — rett feilene og bygg på nytt:</span>
         <ul className={styles.errorList}>
@@ -212,7 +212,7 @@ function GameShell() {
           onClick={openHostWindow}
           title="Åpne kontrollene i et eget, privat vindu"
         >
-          ⧉ Vertsvindu{remoteConnected ? ' ✓' : ''}
+          ⧉ Kontrollvindu{remoteConnected ? ' ✓' : ''}
         </button>
         <SetupScene />
       </div>

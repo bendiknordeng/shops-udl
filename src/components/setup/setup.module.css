@@ -120,19 +120,36 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 10px;
-  max-width: 760px;
+  gap: 12px;
+  max-width: 980px;
 }
 
 .poolItem {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  width: 72px;
-  font-size: 11px;
+  gap: 7px;
+  width: 86px;
+  padding: 7px 4px;
+  border-radius: var(--radius-m);
+  font-size: 12px;
   color: var(--ink-muted);
   text-align: center;
+  transition:
+    color var(--dur-fast),
+    background var(--dur-fast),
+    transform var(--dur-fast) var(--ease-snap);
+}
+
+.poolItem:hover {
+  color: var(--ink-warm);
+  background: rgba(255, 233, 194, 0.06);
+  transform: translateY(-3px);
+}
+
+.poolItem:hover > :first-child {
+  border-color: var(--gold);
+  box-shadow: var(--glow-gold);
 }
 
 .teamsGrid {
@@ -176,10 +193,12 @@
 
 .teamName {
   font-family: var(--font-display);
-  font-size: 25px;
+  font-size: clamp(21px, 2vw, 25px);
+  line-height: 1.15;
   letter-spacing: 0.04em;
   color: var(--ink-warm);
-  min-height: 32px;
+  min-height: 58px;
+  padding-right: 48px;
   cursor: text;
   border-bottom: 1px dashed transparent;
 }
@@ -191,6 +210,7 @@
 .teamNameInput {
   font-family: var(--font-display);
   font-size: 24px;
+  line-height: 1.15;
   letter-spacing: 0.04em;
   color: var(--ink-warm);
   background: rgba(0, 0, 0, 0.35);
@@ -198,23 +218,44 @@
   border-radius: var(--radius-s);
   padding: 2px 8px;
   width: 100%;
+  min-height: 58px;
 }
 
 .teamMembers {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(76px, 1fr));
+  gap: 8px;
 }
 
-.memberChip {
-  display: inline-flex;
+.memberCard {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
   align-items: center;
   gap: 6px;
   background: rgba(0, 0, 0, 0.3);
-  border-radius: 999px;
-  padding: 3px 10px 3px 4px;
-  font-size: 12.5px;
+  border: 1px solid rgba(255, 233, 194, 0.08);
+  border-radius: var(--radius-m);
+  padding: 9px 6px 8px;
+  font-size: 12px;
   color: var(--ink);
+  transition:
+    border-color var(--dur-fast),
+    background var(--dur-fast),
+    transform var(--dur-fast) var(--ease-snap);
+}
+
+.memberCard span:last-child {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.memberCard:hover {
+  transform: translateY(-2px);
+  border-color: var(--gold);
+  background: rgba(255, 182, 40, 0.09);
 }
 
 .actionsRow {
@@ -235,4 +276,339 @@
 .nameError {
   color: var(--danger);
   font-size: 13px;
+}
+
+.presentationButton {
+  color: var(--ink);
+  background: linear-gradient(135deg, var(--pink), #9f38ff 55%, #4c67ff);
+  box-shadow: var(--shadow-tile), var(--glow-pink);
+}
+
+.presentationOverlay,
+.avatarOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow-y: auto;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 61, 129, 0.28), transparent 32%),
+    radial-gradient(circle at 18% 80%, rgba(53, 224, 255, 0.2), transparent 34%),
+    radial-gradient(circle at 82% 76%, rgba(255, 182, 40, 0.18), transparent 35%),
+    rgba(8, 1, 15, 0.97);
+}
+
+.presentationOverlay::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 52px 52px;
+  mask-image: radial-gradient(circle at center, black, transparent 78%);
+}
+
+.presentationLights {
+  position: fixed;
+  inset: -30% 5% auto;
+  height: 80%;
+  pointer-events: none;
+  background: conic-gradient(
+    from 205deg at 50% 0%,
+    transparent 0deg,
+    rgba(255, 182, 40, 0.12) 18deg,
+    transparent 34deg,
+    transparent 68deg,
+    rgba(53, 224, 255, 0.1) 88deg,
+    transparent 108deg
+  );
+  filter: blur(6px);
+  animation: teamLights 7s ease-in-out infinite alternate;
+}
+
+.overlayClose {
+  position: fixed;
+  top: max(18px, env(safe-area-inset-top));
+  right: max(20px, env(safe-area-inset-right));
+  z-index: 3;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(255, 233, 194, 0.22);
+  border-radius: 50%;
+  color: var(--ink-muted);
+  background: rgba(8, 1, 15, 0.68);
+  backdrop-filter: blur(12px);
+  font-size: 18px;
+  transition:
+    color var(--dur-fast),
+    border-color var(--dur-fast),
+    transform var(--dur-fast);
+}
+
+.overlayClose:hover {
+  color: var(--ink);
+  border-color: var(--gold);
+  transform: rotate(5deg) scale(1.05);
+}
+
+.presentationStage {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(18px, 3vh, 34px);
+  padding: clamp(40px, 7vh, 78px) clamp(20px, 5vw, 80px);
+  text-align: center;
+}
+
+.presentationKicker {
+  color: var(--cyan);
+  font-family: var(--font-display);
+  font-size: clamp(18px, 2vw, 26px);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  animation: teamKickerIn 500ms var(--ease-stage) both;
+}
+
+.presentationTeamName {
+  max-width: 1200px;
+  color: var(--ink-warm);
+  font-family: var(--font-display);
+  font-size: clamp(64px, 10vw, 150px);
+  letter-spacing: 0.035em;
+  line-height: 0.82;
+  text-wrap: balance;
+  text-shadow:
+    0 0 42px rgba(255, 182, 40, 0.34),
+    0 6px 0 rgba(0, 0, 0, 0.48);
+  animation: teamNameIn 650ms var(--ease-snap) both;
+}
+
+.presentationMembers {
+  display: flex;
+  max-width: 1440px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(12px, 2vw, 24px);
+}
+
+.presentationMember {
+  display: flex;
+  width: 138px;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 8px;
+  border: 1px solid rgba(255, 233, 194, 0.14);
+  border-radius: var(--radius-l);
+  color: var(--ink);
+  background: linear-gradient(160deg, rgba(44, 18, 80, 0.88), rgba(18, 4, 31, 0.86));
+  box-shadow: var(--shadow-tile);
+  font-size: 16px;
+  opacity: 0;
+  animation: teamMemberIn 620ms var(--ease-snap) forwards;
+  transition:
+    transform var(--dur-fast) var(--ease-snap),
+    border-color var(--dur-fast),
+    box-shadow var(--dur-fast);
+}
+
+.presentationMember:hover {
+  z-index: 1;
+  transform: translateY(-7px) scale(1.04);
+  border-color: var(--gold);
+  box-shadow: var(--shadow-pop), var(--glow-gold);
+}
+
+.presentationMember > :first-child {
+  border-width: 3px;
+  border-color: rgba(255, 182, 40, 0.66);
+}
+
+.presentationFooter {
+  display: grid;
+  width: min(100%, 760px);
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 18px;
+  margin-top: 6px;
+  animation: teamFooterIn 500ms 350ms var(--ease-stage) both;
+}
+
+.presentationFooter > :first-child {
+  justify-self: start;
+}
+
+.presentationFooter > :last-child {
+  justify-self: end;
+}
+
+.presentationProgress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.presentationDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 233, 194, 0.22);
+  transition:
+    width var(--dur-med) var(--ease-stage),
+    background var(--dur-med),
+    box-shadow var(--dur-med);
+}
+
+.presentationDotActive {
+  width: 28px;
+  background: var(--gold);
+  box-shadow: var(--glow-gold);
+}
+
+.avatarOverlay {
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(8, 1, 15, 0.91);
+  backdrop-filter: blur(14px);
+  animation: avatarOverlayIn 180ms ease-out both;
+}
+
+.avatarSpotlightCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: clamp(20px, 4vw, 38px);
+  border: 1px solid rgba(255, 182, 40, 0.38);
+  border-radius: 32px;
+  background: var(--tile-face);
+  box-shadow: var(--shadow-pop), var(--glow-gold);
+  animation: avatarCardIn 420ms var(--ease-snap) both;
+}
+
+.avatarSpotlightCard > :not(.avatarSpotlightGlow) {
+  position: relative;
+  z-index: 1;
+}
+
+.avatarSpotlightCard > :nth-child(2) {
+  border-width: 4px;
+  border-color: var(--gold);
+  box-shadow: 0 0 42px rgba(255, 182, 40, 0.42);
+}
+
+.avatarSpotlightGlow {
+  position: absolute;
+  inset: -25%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(255, 61, 129, 0.22), transparent 62%);
+  animation: avatarGlow 2.8s ease-in-out infinite alternate;
+}
+
+.avatarSpotlightName {
+  color: var(--ink-warm);
+  font-family: var(--font-display);
+  font-size: clamp(42px, 7vw, 72px);
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-align: center;
+  text-shadow: var(--glow-gold);
+}
+
+@keyframes teamKickerIn {
+  from {
+    opacity: 0;
+    letter-spacing: 0.5em;
+  }
+}
+
+@keyframes teamNameIn {
+  from {
+    opacity: 0;
+    transform: scale(0.72) rotate(-1deg);
+  }
+}
+
+@keyframes teamMemberIn {
+  from {
+    opacity: 0;
+    transform: translateY(44px) scale(0.72) rotate(-4deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0);
+  }
+}
+
+@keyframes teamFooterIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+@keyframes teamLights {
+  to {
+    transform: translateX(7%) rotate(5deg);
+  }
+}
+
+@keyframes avatarOverlayIn {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes avatarCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.86);
+  }
+}
+
+@keyframes avatarGlow {
+  to {
+    transform: scale(1.12);
+    opacity: 0.66;
+  }
+}
+
+@media (max-width: 700px) {
+  .presentationStage {
+    justify-content: flex-start;
+    padding-top: 76px;
+  }
+
+  .presentationMembers {
+    gap: 10px;
+  }
+
+  .presentationMember {
+    width: 124px;
+  }
+
+  .presentationFooter {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .presentationProgress {
+    order: -1;
+    width: 100%;
+  }
+
+  .presentationFooter > :first-child,
+  .presentationFooter > :last-child {
+    justify-self: auto;
+  }
 }

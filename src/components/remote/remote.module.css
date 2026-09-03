@@ -68,6 +68,35 @@
   color: var(--gold);
 }
 
+.activeTurnCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  color: var(--ink-warm);
+  background: linear-gradient(100deg, rgba(255, 182, 40, 0.2), rgba(255, 182, 40, 0.06));
+  border: 2px solid var(--gold);
+  border-radius: var(--radius-m);
+  box-shadow: 0 0 22px rgba(255, 182, 40, 0.18);
+}
+
+.activeTurnCardLabel {
+  padding: 4px 9px;
+  color: var(--bg-void);
+  background: linear-gradient(180deg, var(--gold), var(--gold-deep));
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.activeTurnCardName {
+  font-family: var(--font-display);
+  font-size: 24px;
+  letter-spacing: 0.06em;
+}
+
 .row {
   display: flex;
   flex-wrap: wrap;
@@ -170,7 +199,10 @@
 }
 
 .teamRowActive {
-  outline: 1px solid var(--gold);
+  color: var(--ink-warm);
+  background: rgba(255, 182, 40, 0.12);
+  outline: 2px solid var(--gold);
+  box-shadow: 0 0 14px rgba(255, 182, 40, 0.12);
 }
 
 .teamRowName {
@@ -190,7 +222,8 @@
 }
 
 .turnTag {
-  font-size: 9px;
+  font-size: 10px;
+  font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--bg-void);

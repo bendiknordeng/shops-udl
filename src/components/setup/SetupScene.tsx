@@ -21,9 +21,15 @@ export function SetupScene() {
   const [avatarsReady, setAvatarsReady] = useState(false)
   const [editingTeamId, setEditingTeamId] = useState<string | null>(null)
   const [nameError, setNameError] = useState<string | null>(null)
+  const [spotlightParticipantId, setSpotlightParticipantId] = useState<string | null>(null)
+  const [presentationTeamIndex, setPresentationTeamIndex] = useState<number | null>(null)
   const sceneRef = useRef<HTMLDivElement>(null)
   const teamsDrawn = context.teams.length > 0
   const manual = pack.manualTeams !== null
+  const spotlightParticipant =
+    spotlightParticipantId == null ? null : getParticipant(pack, spotlightParticipantId)
+  const presentationTeam =
+    presentationTeamIndex == null ? null : (context.teams[presentationTeamIndex] ?? null)
 
   // Alle avatarressurser lastet eller fallback — gate for «Start spillet».
   useEffect(() => {
@@ -45,6 +51,22 @@ export function SetupScene() {
     }
   }, [manual, teamsDrawn, pack, send])
 
+  useEffect(() => {
+    if (spotlightParticipantId == null && presentationTeamIndex == null) return
+
+    function handleOverlayKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return
+      if (spotlightParticipantId != null) {
+        setSpotlightParticipantId(null)
+        return
+      }
+      setPresentationTeamIndex(null)
+    }
+
+    window.addEventListener('keydown', handleOverlayKeyDown)
+    return () => window.removeEventListener('keydown', handleOverlayKeyDown)
+  }, [presentationTeamIndex, spotlightParticipantId])
+
   // Scenen bygges opp lagvis ved appstart.
   useGSAP(
     () => {
@@ -62,26 +84,28 @@ export function SetupScene() {
     { scope: sceneRef },
   )
 
-  // Avatarer «stokkes fysisk» inn i lagene ved trekning.
+  // Lagene kommer rolig inn i sin endelige plass. Selve show-effekten ligger
+  // i presentasjonsmodusen, så oppsettet er alltid lett å lese.
   useGSAP(
     () => {
       if (!teamsDrawn) return
       gsap.from('[data-anim="team-card"]', {
-        y: 30,
+        y: 18,
         opacity: 0,
         stagger: dur(0.1),
-        duration: dur(0.45),
+        duration: dur(0.4),
         ease: 'power2.out',
+        clearProps: 'transform,opacity',
       })
       gsap.from('[data-anim="member"]', {
-        x: () => gsap.utils.random(-160, 160),
-        y: () => gsap.utils.random(-90, -30),
-        rotation: () => gsap.utils.random(-40, 40),
+        y: 10,
+        scale: 0.94,
         opacity: 0,
-        stagger: { each: dur(0.04), from: 'random' },
-        duration: dur(0.6),
-        ease: 'back.out(1.4)',
-        delay: dur(0.15),
+        stagger: dur(0.04),
+        duration: dur(0.35),
+        ease: 'power2.out',
+        delay: dur(0.1),
+        clearProps: 'transform,opacity',
       })
     },
     { scope: sceneRef, dependencies: [teamsDrawn, context.teams.map((t) => t.id).join('|')] },
@@ -111,6 +135,7 @@ export function SetupScene() {
   const uneven = new Set(sizes).size > 1
 
   function handleDraw() {
+    setPresentationTeamIndex(null)
     const teams = allocateRandomTeams(pack.participants, context.teamCount)
     send({ type: 'DRAW_TEAMS', teams, manual: false })
     send({ type: 'DRAW_TEAM_NAMES', names: drawTeamNames(pack, teams) })
@@ -150,12 +175,8 @@ export function SetupScene() {
   return (
     <div ref={sceneRef} className={styles.scene}>
       <h1 className={styles.title} data-anim="title">
-        SHOPS <span className={styles.titleAccent}>UDL</span> QUIZ
+        SHOPS <span className={styles.titleAccent}>UDL</span>
       </h1>
-      <p className={styles.intro} data-anim="intro">
-        Jeopardy for utdrikningslaget til Anders «Shops» Vandvik. Velg antall lag, trekk
-        deltakerne og la scenen gjøre resten.
-      </p>
 
       <div className={styles.controlsRow} data-anim="controls">
         {!manual && (
@@ -201,10 +222,16 @@ export function SetupScene() {
       {!teamsDrawn ? (
         <div className={styles.pool} data-anim="controls">
           {pack.participants.map((p) => (
-            <div key={p.id} className={styles.poolItem}>
-              <Avatar participant={p} size={52} />
-              {p.name}
-            </div>
+            <button
+              key={p.id}
+              type="button"
+              className={styles.poolItem}
+              aria-label={`Vis stort bilde av ${p.name}`}
+              onClick={() => setSpotlightParticipantId(p.id)}
+            >
+              <Avatar participant={p} size={64} />
+              <span>{p.name}</span>
+            </button>
           ))}
         </div>
       ) : (
@@ -241,10 +268,17 @@ export function SetupScene() {
                   const participant = getParticipant(pack, pid)
                   if (!participant) return null
                   return (
-                    <span key={pid} className={styles.memberChip} data-anim="member">
-                      <Avatar participant={participant} size={26} />
-                      {participant.name}
-                    </span>
+                    <button
+                      key={pid}
+                      type="button"
+                      className={styles.memberCard}
+                      data-anim="member"
+                      aria-label={`Vis stort bilde av ${participant.name}`}
+                      onClick={() => setSpotlightParticipantId(participant.id)}
+                    >
+                      <Avatar participant={participant} size={58} />
+                      <span>{participant.name}</span>
+                    </button>
                   )
                 })}
               </div>
@@ -264,6 +298,13 @@ export function SetupScene() {
           )
         ) : (
           <>
+            <button
+              type="button"
+              className={`stageButton ${styles.presentationButton}`}
+              onClick={() => setPresentationTeamIndex(0)}
+            >
+              ✦ Presenter lagene
+            </button>
             {!manual && (
               <button type="button" className="stageButton stageButton--ghost" onClick={handleDraw}>
                 Trekk lag på nytt
@@ -297,6 +338,111 @@ export function SetupScene() {
         )}
       </div>
       <span className={styles.startHint}>{startHint}</span>
+
+      {presentationTeam && presentationTeamIndex != null && (
+        <div
+          className={styles.presentationOverlay}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Presentasjon av ${presentationTeam.name}`}
+        >
+          <div className={styles.presentationLights} aria-hidden="true" />
+          <button
+            type="button"
+            className={styles.overlayClose}
+            aria-label="Lukk lagpresentasjonen"
+            onClick={() => setPresentationTeamIndex(null)}
+          >
+            ✕
+          </button>
+          <div key={presentationTeam.id} className={styles.presentationStage}>
+            <span className={styles.presentationKicker}>
+              Lag {presentationTeamIndex + 1} av {context.teams.length}
+            </span>
+            <h2 className={styles.presentationTeamName}>{presentationTeam.name}</h2>
+            <div className={styles.presentationMembers}>
+              {presentationTeam.participantIds.map((participantId, memberIndex) => {
+                const participant = getParticipant(pack, participantId)
+                if (!participant) return null
+                return (
+                  <button
+                    key={participant.id}
+                    type="button"
+                    className={styles.presentationMember}
+                    style={{ animationDelay: `${memberIndex * 90}ms` }}
+                    aria-label={`Vis stort bilde av ${participant.name}`}
+                    onClick={() => setSpotlightParticipantId(participant.id)}
+                  >
+                    <Avatar participant={participant} size={112} />
+                    <span>{participant.name}</span>
+                  </button>
+                )
+              })}
+            </div>
+            <div className={styles.presentationFooter}>
+              <button
+                type="button"
+                className="stageButton stageButton--ghost"
+                disabled={presentationTeamIndex === 0}
+                onClick={() => setPresentationTeamIndex((index) => Math.max(0, (index ?? 0) - 1))}
+              >
+                ← Forrige
+              </button>
+              <div className={styles.presentationProgress} aria-hidden="true">
+                {context.teams.map((team, index) => (
+                  <span
+                    key={team.id}
+                    className={`${styles.presentationDot} ${index === presentationTeamIndex ? styles.presentationDotActive : ''}`}
+                  />
+                ))}
+              </div>
+              {presentationTeamIndex < context.teams.length - 1 ? (
+                <button
+                  type="button"
+                  className="stageButton"
+                  onClick={() => setPresentationTeamIndex((index) => (index ?? 0) + 1)}
+                >
+                  Neste lag →
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="stageButton"
+                  onClick={() => setPresentationTeamIndex(null)}
+                >
+                  Alle er klare
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {spotlightParticipant && (
+        <div
+          className={styles.avatarOverlay}
+          role="dialog"
+          aria-modal="true"
+          aria-label={spotlightParticipant.name}
+          onClick={(event) => {
+            if (event.target === event.currentTarget) setSpotlightParticipantId(null)
+          }}
+        >
+          <button
+            type="button"
+            className={styles.overlayClose}
+            aria-label="Lukk stort bilde"
+            onClick={() => setSpotlightParticipantId(null)}
+          >
+            ✕
+          </button>
+          <div className={styles.avatarSpotlightCard}>
+            <div className={styles.avatarSpotlightGlow} aria-hidden="true" />
+            <Avatar participant={spotlightParticipant} size={320} />
+            <span className={styles.avatarSpotlightName}>{spotlightParticipant.name}</span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

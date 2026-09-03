@@ -12,6 +12,7 @@ export type GameEvent =
   | { type: 'SCENE_DONE' }
   | { type: 'OPEN_CLUE'; clueId: string }
   | { type: 'PRESENTATION_READY' }
+  | { type: 'START_CLUE' }
   | { type: 'MEDIA_FAILED'; message: string }
   | { type: 'RETRY_MEDIA' }
   | { type: 'SKIP_MEDIA' }

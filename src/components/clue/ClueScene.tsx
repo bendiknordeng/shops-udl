@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSelector } from '@xstate/react'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
@@ -6,15 +6,15 @@ import { useGame } from '../../app/GameProvider'
 import { sceneBus } from '../../app/scene-bus'
 import { dur } from '../../app/motion'
 import { audioEngine, type AudioEngineState } from '../../audio/audio-engine'
-import { award as awardSfx } from '../../audio/sfx'
 import { getCategory, getClue } from '../../game/selectors'
 import { TypeIcon, TYPE_LABELS } from '../common/TypeIcon'
 import { Countdown } from '../timer/Countdown'
 import { Visualizer } from './Visualizer'
+import { PlaybackProgress } from './PlaybackProgress'
 import { AnswerReveal } from './AnswerReveal'
 import styles from './clue.module.css'
 
-type CluePhase = 'presenting' | 'active' | 'open' | 'decided'
+type CluePhase = 'presenting' | 'ready' | 'active' | 'open' | 'decided'
 
 export function ClueScene() {
   const { pack, actorRef, send } = useGame()
@@ -23,22 +23,23 @@ export function ClueScene() {
   const clue = getClue(pack, context.activeClueId)
   const category = getCategory(pack, clue?.categoryId ?? null)
 
-  const phase: CluePhase = snapshot.matches({ clue: 'presenting' })
-    ? 'presenting'
-    : snapshot.matches({ clue: 'active' })
-      ? 'active'
-      : snapshot.matches({ clue: 'open' })
-        ? 'open'
-        : 'decided'
+  let phase: CluePhase = 'decided'
+  if (snapshot.matches({ clue: 'presenting' })) phase = 'presenting'
+  else if (snapshot.matches({ clue: 'ready' })) phase = 'ready'
+  else if (snapshot.matches({ clue: 'active' })) phase = 'active'
+  else if (snapshot.matches({ clue: 'open' })) phase = 'open'
 
   const stageRef = useRef<HTMLDivElement>(null)
   const flashRef = useRef<HTMLDivElement>(null)
+  const countdownFlashRef = useRef<HTMLDivElement>(null)
   const chipRef = useRef<HTMLDivElement>(null)
   const [entranceDone, setEntranceDone] = useState(false)
   const [mediaReady, setMediaReady] = useState(false)
   const [audioState, setAudioState] = useState<AudioEngineState>(audioEngine.getState())
   const [imageAttempt, setImageAttempt] = useState(0)
   const [imageFallback, setImageFallback] = useState(false)
+  // Fasiten holdes montert til utgangsanimasjonen er ferdig.
+  const [revealMounted, setRevealMounted] = useState(context.revealed)
   const audioStartedRef = useRef(false)
   const exitingRef = useRef(false)
 
@@ -144,6 +145,13 @@ export function ClueScene() {
     }
   }, [phase, clue, audioState.status])
 
+  // Utløpt svartid fryser sangen på gjeldende posisjon.
+  useEffect(() => {
+    if (phase === 'open' && context.timer.status === 'expired' && clue?.media.kind === 'audio') {
+      audioEngine.pause()
+    }
+  }, [phase, context.timer.status, clue])
+
   // Tidsutløp: scenen fryser tydelig uten å skjule media.
   useGSAP(
     () => {
@@ -165,7 +173,6 @@ export function ClueScene() {
       const chip = chipRef.current
       const stage = stageRef.current
       if (!chip || !stage) return
-      awardSfx()
       const targetEl = document.querySelector(`[data-team-card="${context.lastOutcome.teamId}"]`)
       const stageRect = stage.getBoundingClientRect()
       const startX = stageRect.left + stageRect.width / 2
@@ -227,23 +234,34 @@ export function ClueScene() {
   }
 
   useEffect(() => {
+    if (context.revealed) setRevealMounted(true)
+  }, [context.revealed])
+
+  useEffect(() => {
     return () => {
       audioEngine.unload()
     }
   }, [])
 
+  const flashFinalSecond = useCallback(() => {
+    const element = countdownFlashRef.current
+    if (!element) return
+    gsap.killTweensOf(element)
+    gsap.fromTo(
+      element,
+      { opacity: 0.62 },
+      { opacity: 0, duration: dur(0.58), ease: 'power2.out' },
+    )
+  }, [])
+
   if (!clue || !category) return null
 
-  const phaseLabel =
-    phase === 'presenting'
-      ? 'Gjør klar …'
-      : phase === 'active'
-        ? `Svarfase — ${chooserTeam?.name ?? ''}`
-        : phase === 'open'
-          ? 'Åpen svarfase — verten spør lagene'
-          : context.lastOutcome?.kind === 'award'
-            ? 'Poeng delt ut'
-            : 'Ingen fikk riktig'
+  let phaseLabel = 'Ingen fikk riktig'
+  if (phase === 'presenting') phaseLabel = 'Gjør klar …'
+  else if (phase === 'ready') phaseLabel = 'Gjør dere klare'
+  else if (phase === 'active') phaseLabel = `Svarfase — ${chooserTeam?.name ?? ''}`
+  else if (phase === 'open') phaseLabel = ''
+  else if (context.lastOutcome?.kind === 'award') phaseLabel = 'Poeng delt ut'
 
   const showMediaError = Boolean(context.mediaError) && phase === 'presenting'
   const awardOutcome = context.lastOutcome?.kind === 'award' ? context.lastOutcome : null
@@ -251,8 +269,79 @@ export function ClueScene() {
     ? (context.teams.find((t) => t.id === awardOutcome.teamId) ?? null)
     : null
 
+  let mediaContent = (
+    <div className={styles.audioStage}>
+      <Visualizer playing={audioState.status === 'playing'} />
+      <PlaybackProgress />
+      {clue.type === 'ai-song' && clue.language && phase !== 'decided' && (
+        <span className={styles.languageHint}>Hint: språket er {clue.language}</span>
+      )}
+    </div>
+  )
+
+  if (showMediaError) {
+    mediaContent = (
+      <div className={styles.errorPanel}>
+        <span>{context.mediaError}</span>
+        <div className={styles.errorActions}>
+          <button
+            type="button"
+            className="stageButton stageButton--small"
+            onClick={() => {
+              send({ type: 'RETRY_MEDIA' })
+              if (clue.media.kind === 'audio') audioEngine.retry()
+              else setImageAttempt((n) => n + 1)
+            }}
+          >
+            Prøv igjen
+          </button>
+          <button
+            type="button"
+            className="stageButton stageButton--ghost stageButton--small"
+            onClick={() => send({ type: 'SKIP_MEDIA' })}
+          >
+            Hopp til svarfase
+          </button>
+        </div>
+      </div>
+    )
+  } else if (phase === 'presenting') {
+    mediaContent = (
+      <div className={styles.loadingPanel}>
+        <div className={styles.spinner} />
+        <span>{clue.media.kind === 'audio' ? 'Laster lyd …' : 'Laster bilde …'}</span>
+      </div>
+    )
+  } else if (phase === 'ready') {
+    mediaContent = (
+      <div className={styles.readyPanel}>
+        <span className={styles.readyIcon} aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path
+              d="M13.2 2.8 5.9 13h5.4l-.5 8.2L18.1 11h-5.4l.5-8.2Z"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </span>
+        <span className={styles.readyTitle}>Gjør dere klare</span>
+      </div>
+    )
+  } else if (clue.media.kind === 'image') {
+    mediaContent = (
+      <div className={styles.mediaColumn}>
+        <ImageStage
+          src={imageFallback ? '/media/images/placeholder-clue.svg' : clue.media.src}
+          hidden={context.mediaHidden}
+        />
+      </div>
+    )
+  }
+
   return (
     <div ref={stageRef} className={styles.stage} data-phase={phase}>
+      <div ref={countdownFlashRef} className={styles.countdownFlash} aria-hidden="true" />
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <span className={styles.category}>{category.title}</span>
@@ -264,61 +353,20 @@ export function ClueScene() {
         </span>
       </div>
 
-      <div className={styles.phaseBanner} data-phase={phase}>
-        {phaseLabel}
-      </div>
+      {phaseLabel && (
+        <div className={styles.phaseBanner} data-phase={phase}>
+          {phaseLabel}
+        </div>
+      )}
 
       <div className={styles.body}>
         <div ref={flashRef} className={styles.expiredFlash} />
 
-        {showMediaError ? (
-          <div className={styles.errorPanel}>
-            <span>{context.mediaError}</span>
-            <div className={styles.errorActions}>
-              <button
-                type="button"
-                className="stageButton stageButton--small"
-                onClick={() => {
-                  send({ type: 'RETRY_MEDIA' })
-                  if (clue.media.kind === 'audio') audioEngine.retry()
-                  else setImageAttempt((n) => n + 1)
-                }}
-              >
-                Prøv igjen
-              </button>
-              <button
-                type="button"
-                className="stageButton stageButton--ghost stageButton--small"
-                onClick={() => send({ type: 'SKIP_MEDIA' })}
-              >
-                Hopp til svarfase
-              </button>
-            </div>
-          </div>
-        ) : phase === 'presenting' ? (
-          <div className={styles.loadingPanel}>
-            <div className={styles.spinner} />
-            <span>{clue.media.kind === 'audio' ? 'Laster lyd …' : 'Laster bilde …'}</span>
-          </div>
-        ) : clue.media.kind === 'image' ? (
-          <div className={styles.mediaColumn}>
-            <ImageStage
-              src={imageFallback ? '/media/images/placeholder-clue.svg' : clue.media.src}
-              hidden={context.mediaHidden}
-            />
-          </div>
-        ) : (
-          <div className={styles.audioStage}>
-            <Visualizer playing={audioState.status === 'playing'} />
-            {clue.type === 'ai-song' && clue.language && phase !== 'decided' && (
-              <span className={styles.languageHint}>Hint: språket er {clue.language}</span>
-            )}
-          </div>
-        )}
+        {mediaContent}
 
-        {phase !== 'presenting' && (
+        {phase !== 'presenting' && phase !== 'ready' && (
           <div className={styles.timerSlot}>
-            <Countdown />
+            <Countdown onFinalTick={flashFinalSecond} />
           </div>
         )}
       </div>
@@ -337,7 +385,15 @@ export function ClueScene() {
         </div>
       )}
 
-      {context.revealed && <AnswerReveal clue={clue} />}
+      {revealMounted && (
+        <div className={styles.revealLayer}>
+          <AnswerReveal
+            clue={clue}
+            visible={context.revealed}
+            onHidden={() => setRevealMounted(false)}
+          />
+        </div>
+      )}
 
       {phase === 'decided' && (
         <div style={{ display: 'flex', justifyContent: 'center' }}>

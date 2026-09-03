@@ -6,14 +6,13 @@ import { useGame } from '../../app/GameProvider'
 import { dur } from '../../app/motion'
 import { sceneBus } from '../../app/scene-bus'
 import { getParticipant, sortedByScore, winners } from '../../game/selectors'
-import { fanfare } from '../../audio/sfx'
 import { launchConfetti } from '../../effects/confetti'
 import { Avatar } from '../common/Avatar'
 import styles from './finale.module.css'
 
 /**
  * Vinnersekvens: resultatliste bygges nedenfra, vinnerlaget avsløres sist
- * med fanfare og konfetti. Ved uavgjort feires alle vinnerlagene.
+ * med konfetti. Ved uavgjort feires alle vinnerlagene.
  * Verten kan gå tilbake for poengretting (GAME_SPEC §15).
  */
 export function FinaleScene() {
@@ -47,7 +46,6 @@ export function FinaleScene() {
         opacity: 0,
         duration: dur(0.8),
         ease: 'elastic.out(0.8, 0.5)',
-        onStart: () => fanfare(),
       })
       tl.from(`.${styles.finaleActions}`, { opacity: 0, duration: dur(0.4) })
       const unregister = sceneBus.registerSkippable(() => tl.progress(1))

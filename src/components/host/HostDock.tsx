@@ -49,6 +49,11 @@ export function HostDock({ remoteConnected = false }: { remoteConnected?: boolea
   }, [remoteConnected])
 
   const inCluePhase = snapshot.matches('clue')
+  const clueReady = snapshot.matches({ clue: 'ready' })
+  const clueStarted =
+    snapshot.matches({ clue: 'active' }) ||
+    snapshot.matches({ clue: 'open' }) ||
+    snapshot.matches({ clue: 'decided' })
   const clue = getClue(pack, context.activeClueId)
 
   // Nullstill ventende avgjørelse når fasen endres.
@@ -66,13 +71,14 @@ export function HostDock({ remoteConnected = false }: { remoteConnected?: boolea
   const isAudioClue = clue?.media.kind === 'audio'
   const canDecide = snapshot.matches({ clue: 'active' }) || snapshot.matches({ clue: 'open' })
   const timerStatus = context.timer.status
+  const activeTeam = context.teams[context.activeTeamIndex] ?? null
 
   if (!open) {
     return (
       <div className={styles.dockWrap}>
         <div className={`${styles.dock} ${styles.dockCollapsed}`}>
           <button type="button" className={styles.toggleButton} onClick={() => setOpen(true)}>
-            ▲ Vertskontroller{remoteConnected ? ' · styres fra vertsvinduet' : ''}
+            ▲ Kontroller{remoteConnected ? ' · styres fra kontrollvinduet' : ''}
           </button>
         </div>
       </div>
@@ -86,6 +92,13 @@ export function HostDock({ remoteConnected = false }: { remoteConnected?: boolea
         <button type="button" className={styles.toggleButton} onClick={() => setOpen(false)}>
           ▼
         </button>
+
+        {activeTeam && (
+          <div className={styles.activeTurn} aria-label={`Tur: ${activeTeam.name}`}>
+            <span className={styles.activeTurnLabel}>Tur</span>
+            <strong className={styles.activeTurnName}>{activeTeam.name}</strong>
+          </div>
+        )}
 
         {/* Media-kontroller */}
         {inCluePhase && isAudioClue && (
@@ -130,8 +143,21 @@ export function HostDock({ remoteConnected = false }: { remoteConnected?: boolea
           </div>
         )}
 
+        {clueReady && (
+          <div className={styles.group}>
+            <span className={styles.groupLabel}>Gjør dere klare</span>
+            <button
+              type="button"
+              className={`${styles.hostButton} ${styles.hostButtonPrimary}`}
+              onClick={() => send({ type: 'START_CLUE' })}
+            >
+              ▶ Start spørsmål
+            </button>
+          </div>
+        )}
+
         {/* Bilde-kontroller */}
-        {inCluePhase && clue?.media.kind === 'image' && !snapshot.matches({ clue: 'presenting' }) && (
+        {clueStarted && clue?.media.kind === 'image' && (
           <div className={styles.group}>
             <button
               type="button"
@@ -164,7 +190,7 @@ export function HostDock({ remoteConnected = false }: { remoteConnected?: boolea
         )}
 
         {/* Fasit */}
-        {inCluePhase && !snapshot.matches({ clue: 'presenting' }) && (
+        {clueStarted && (
           <div className={styles.group}>
             <button
               type="button"
@@ -298,7 +324,7 @@ export function HostDock({ remoteConnected = false }: { remoteConnected?: boolea
             onClick={openHostWindow}
             title="Åpne kontrollene i et eget, privat vindu (skjules fra delt skjerm)"
           >
-            ⧉ Vertsvindu{remoteConnected ? ' ✓' : ''}
+            ⧉ Kontrollvindu{remoteConnected ? ' ✓' : ''}
           </button>
           <button
             type="button"

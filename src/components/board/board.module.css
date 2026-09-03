@@ -6,31 +6,6 @@
   padding: clamp(10px, 1.6vh, 20px);
 }
 
-.header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 0 4px;
-}
-
-.boardTitle {
-  font-family: var(--font-display);
-  font-size: clamp(20px, 2.4vw, 30px);
-  letter-spacing: 0.1em;
-  color: var(--ink-warm);
-}
-
-.turnBanner {
-  font-size: 14px;
-  color: var(--ink-muted);
-}
-
-.turnBanner strong {
-  color: var(--gold);
-  font-weight: 600;
-}
-
 .grid {
   flex: 1;
   display: grid;
@@ -41,7 +16,7 @@
 
 .column {
   display: grid;
-  grid-template-rows: auto repeat(5, 1fr);
+  grid-template-rows: clamp(62px, 6vh, 68px) repeat(5, 1fr);
   gap: var(--board-gap);
   min-height: 0;
 }
@@ -57,10 +32,11 @@
   padding: 8px 6px;
   font-family: var(--font-display);
   font-size: clamp(14px, 1.5vw, 22px);
+  line-height: 1.08;
   letter-spacing: 0.08em;
   color: var(--cyan);
   text-shadow: 0 0 14px rgba(53, 224, 255, 0.4);
-  min-height: 48px;
+  overflow-wrap: anywhere;
 }
 
 .tile {
@@ -128,16 +104,164 @@
 }
 
 .tileUsed {
-  filter: saturate(0.15) brightness(0.5);
+  background: #130724;
+  border-color: rgba(255, 182, 40, 0.34);
   box-shadow: none;
   pointer-events: none;
 }
 
-.tileUsed .tileValue {
-  color: var(--ink-faint);
-  text-shadow: none;
-  text-decoration: line-through;
-  text-decoration-thickness: 3px;
+.tileUsed:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.usedClue {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  padding: 8px;
+  isolation: isolate;
+}
+
+.usedClueImage {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.usedClueAudio {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--cyan);
+  background:
+    radial-gradient(circle at 50% 42%, rgba(53, 224, 255, 0.18), transparent 58%),
+    linear-gradient(145deg, #281047, #10051f);
+}
+
+.usedClueDisc {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(53, 224, 255, 0.5);
+  border-radius: 50%;
+  background: rgba(8, 2, 18, 0.62);
+  box-shadow: 0 0 18px rgba(53, 224, 255, 0.2);
+}
+
+.usedClueWave {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 42px;
+}
+
+.usedClueWave i {
+  width: 3px;
+  height: 42%;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: 0 0 7px rgba(53, 224, 255, 0.55);
+}
+
+.usedClueWave i:nth-child(2),
+.usedClueWave i:nth-child(6) {
+  height: 72%;
+}
+
+.usedClueWave i:nth-child(3),
+.usedClueWave i:nth-child(5) {
+  height: 100%;
+}
+
+.usedClueWave i:nth-child(4) {
+  height: 58%;
+}
+
+.usedClueShade {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: linear-gradient(180deg, rgba(8, 2, 18, 0.06) 10%, rgba(8, 2, 18, 0.92) 76%);
+}
+
+.usedClueValue {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  padding: 2px 6px;
+  color: var(--bg-void);
+  background: var(--gold);
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  line-height: 1;
+}
+
+.usedClueWinner,
+.usedClueNoScore {
+  position: absolute;
+  top: 6px;
+  left: 7px;
+  max-width: calc(100% - 58px);
+  overflow: hidden;
+  padding: 2px 6px;
+  border: 1px solid rgba(157, 255, 92, 0.5);
+  border-radius: 999px;
+  color: var(--lime);
+  background: rgba(8, 20, 10, 0.82);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.usedClueNoScore {
+  border-color: rgba(255, 233, 194, 0.25);
+  color: var(--ink-muted);
+  background: rgba(8, 2, 18, 0.8);
+}
+
+.usedClueAnswer {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--ink-warm);
+  font-family: var(--font-display);
+  font-size: clamp(14px, 1.45vw, 21px);
+  line-height: 1.05;
+  letter-spacing: 0.035em;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.usedClueMeta {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--ink-muted);
+  font-size: 9px;
+  line-height: 1.1;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .footer {

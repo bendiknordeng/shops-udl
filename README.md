@@ -43,7 +43,7 @@ manualTeams: [
 ],
 ```
 
-Alle 17 deltaker-IDer må fordeles nøyaktig én gang. Med `manualTeams` satt
+Alle 18 deltaker-IDer må fordeles nøyaktig én gang. Med `manualTeams` satt
 skjules «Trekk lag på nytt» og lagantall-velgeren. Sett tilbake til `null` for
 tilfeldig trekning.
 

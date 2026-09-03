@@ -21,6 +21,7 @@ const PHASE_LABELS: Record<ReturnType<typeof remotePhase>, string> = {
   startingGame: 'Spillet starter …',
   board: 'Brettet — velg rute',
   presenting: 'Gjør klar rute …',
+  ready: 'Gjør dere klare',
   active: 'Aktiv svarfase',
   open: 'Åpen svarfase',
   decided: 'Avgjort — klar for brettet',
@@ -45,7 +46,7 @@ export function RemoteHostWindow({ pack }: { pack: GamePack }) {
   const lastSeenRef = useRef(0)
 
   useEffect(() => {
-    document.title = 'Shops UDL Quiz — Vertskontroller'
+    document.title = 'SHOPS UDL — Kontroller'
     if (typeof BroadcastChannel === 'undefined') return
     const channel = new BroadcastChannel(HOST_CHANNEL)
     channelRef.current = channel
@@ -81,8 +82,15 @@ export function RemoteHostWindow({ pack }: { pack: GamePack }) {
   const context = state?.context ?? null
   const clue = context ? getClue(pack, context.activeClueId) : null
   const category = clue ? getCategory(pack, clue.categoryId) : null
-  const inClue = phase === 'presenting' || phase === 'active' || phase === 'open' || phase === 'decided'
+  const inClue =
+    phase === 'presenting' ||
+    phase === 'ready' ||
+    phase === 'active' ||
+    phase === 'open' ||
+    phase === 'decided'
+  const clueStarted = phase === 'active' || phase === 'open' || phase === 'decided'
   const canDecide = phase === 'active' || phase === 'open'
+  const activeTeam = context?.teams[context.activeTeamIndex] ?? null
 
   // Nullstill ventende avgjørelse ved rute-/faseskifte.
   const clueKey = context?.activeClueId ?? ''
@@ -119,6 +127,13 @@ export function RemoteHostWindow({ pack }: { pack: GamePack }) {
         )}
         {context.mediaError && <span className={styles.warning}>{context.mediaError}</span>}
       </div>
+
+      {activeTeam && (
+        <div className={styles.activeTurnCard} aria-label={`Tur: ${activeTeam.name}`}>
+          <span className={styles.activeTurnCardLabel}>Tur</span>
+          <strong className={styles.activeTurnCardName}>{activeTeam.name}</strong>
+        </div>
+      )}
 
       {/* Lag og poeng */}
       {context.teams.length > 0 && (
@@ -183,7 +198,17 @@ export function RemoteHostWindow({ pack }: { pack: GamePack }) {
               {clue.language && <span className={styles.answerMeta}>Språk: {clue.language}</span>}
             </div>
 
-            {phase !== 'presenting' && (
+            {phase === 'ready' && (
+              <button
+                type="button"
+                className={`${styles.button} ${styles.buttonPrimary}`}
+                onClick={() => sendEvent({ type: 'START_CLUE' })}
+              >
+                ▶ Start spørsmål
+              </button>
+            )}
+
+            {clueStarted && (
               <RemoteTimer
                 timer={context.timer}
                 onPause={() => sendEvent({ type: 'PAUSE_COUNTDOWN' })}
@@ -230,12 +255,12 @@ export function RemoteHostWindow({ pack }: { pack: GamePack }) {
                   )}
                 </>
               )}
-              {clue.media.kind === 'image' && phase !== 'presenting' && (
+              {clue.media.kind === 'image' && clueStarted && (
                 <button type="button" className={styles.button} onClick={() => sendEvent({ type: 'TOGGLE_MEDIA_HIDDEN' })}>
                   {context.mediaHidden ? 'Vis bilde' : 'Skjul bilde'}
                 </button>
               )}
-              {phase !== 'presenting' && (
+              {clueStarted && (
                 <button
                   type="button"
                   className={styles.button}
@@ -392,18 +417,6 @@ export function RemoteHostWindow({ pack }: { pack: GamePack }) {
               />
               <span className={styles.sliderValue}>{Math.round(state.settings.mediaVolume * 100)}%</span>
             </div>
-            <div className={styles.sliderRow}>
-              Effekter
-              <input
-                type="range"
-                min={0}
-                max={1}
-                step={0.05}
-                value={state.settings.sfxVolume}
-                onChange={(e) => command({ kind: 'settings', patch: { sfxVolume: Number(e.target.value) } })}
-              />
-              <span className={styles.sliderValue}>{Math.round(state.settings.sfxVolume * 100)}%</span>
-            </div>
             {context.teams.map((team) => (
               <div key={team.id} className={styles.row}>
                 <span className={styles.teamRowName}>{team.name}</span>
@@ -482,7 +495,7 @@ export function RemoteHostWindow({ pack }: { pack: GamePack }) {
 function Header({ connected }: { connected: boolean }) {
   return (
     <div className={styles.header}>
-      <span className={styles.title}>VERTSKONTROLLER</span>
+      <span className={styles.title}>KONTROLLER</span>
       <span className={styles.status}>
         <span className={`${styles.statusDot} ${connected ? styles.statusDotConnected : ''}`} />
         {connected ? 'Tilkoblet hovedvinduet' : 'Mistet kontakt — er hovedvinduet åpent?'}

@@ -32,7 +32,6 @@ const normalizeName = (name: string) => name.trim().toLocaleLowerCase('nb-NO')
 
 export const TeamNameBankSchema = z
   .array(z.string())
-  .min(100, 'Navnebanken må ha minst 100 kandidater')
   .superRefine((names, ctx) => {
     const seen = new Set<string>()
     for (const raw of names) {
@@ -111,7 +110,7 @@ export type Clue = z.infer<typeof ClueSchema>
 
 export const CategorySchema = z.object({
   id: z.string().min(1),
-  title: z.string().min(1).max(28),
+  title: z.string().min(1).max(32),
 })
 export type Category = z.infer<typeof CategorySchema>
 

@@ -9,16 +9,25 @@ export type AudioEngineState = {
   error: string | null
 }
 
+export type AudioPlaybackProgress = {
+  elapsedSeconds: number
+  durationSeconds: number
+  fraction: number
+}
+
 type Listener = (state: AudioEngineState) => void
 
 const POSITION_KEY_PREFIX = 'shops-quiz:media-pos:'
+const MAX_LOAD_ATTEMPTS = 3
+const RETRY_DELAY_MS = 300
 
 /**
  * Howler-basert motor for spørsmålslyd. Egen volumkanal for spørsmålsmedia,
- * separat fra lydeffektene (sfx.ts). Viser aldri metadata som kan røpe svar.
+ * Viser aldri metadata som kan røpe svar.
  */
 class AudioEngine {
   private howl: Howl | null = null
+  private unlockHowl: Howl | null = null
   private media: AudioMedia | null = null
   private clueId: string | null = null
   private mediaVolume = 1
@@ -26,6 +35,8 @@ class AudioEngine {
   private listeners = new Set<Listener>()
   private watchInterval: number | null = null
   private analyser: AnalyserNode | null = null
+  private loadGeneration = 0
+  private retryTimeout: number | null = null
 
   subscribe(listener: Listener): () => void {
     this.listeners.add(listener)
@@ -35,6 +46,38 @@ class AudioEngine {
 
   getState(): AudioEngineState {
     return this.state
+  }
+
+  /**
+   * Initialiser Howlers opplåsing før første spørsmål åpnes. Da kan første
+   * klikk/tast i spillet låse opp Web Audio, også når lydfilen lastes senere.
+   */
+  prepare() {
+    if (this.unlockHowl) return
+    const unlockHowl = new Howl({
+      src: ['/media/audio/placeholder-song.wav'],
+      preload: false,
+      volume: 0,
+    })
+    this.unlockHowl = unlockHowl
+    unlockHowl.once('unlock', () => {
+      window.setTimeout(() => {
+        unlockHowl.unload()
+      }, 0)
+    })
+  }
+
+  getPlaybackProgress(): AudioPlaybackProgress {
+    if (!this.howl || !this.media) {
+      return { elapsedSeconds: 0, durationSeconds: 0, fraction: 0 }
+    }
+    const start = this.media.startAtSeconds
+    const end = this.media.endAtSeconds ?? this.howl.duration()
+    const durationSeconds = Math.max(0, end - start)
+    const position = Number(this.howl.seek()) || start
+    const elapsedSeconds = Math.max(0, Math.min(durationSeconds, position - start))
+    const fraction = durationSeconds > 0 ? elapsedSeconds / durationSeconds : 0
+    return { elapsedSeconds, durationSeconds, fraction }
   }
 
   private setState(patch: Partial<AudioEngineState>) {
@@ -55,9 +98,14 @@ class AudioEngine {
 
   /** Laster lyd for en rute. Kalles i presenting-fasen. */
   load(clueId: string, media: AudioMedia) {
+    this.loadAttempt(clueId, media, 1)
+  }
+
+  private loadAttempt(clueId: string, media: AudioMedia, attempt: number) {
     this.unload()
     this.clueId = clueId
     this.media = media
+    const generation = ++this.loadGeneration
     this.setState({ status: 'loading', clueId, error: null })
     this.howl = new Howl({
       src: [media.src],
@@ -65,29 +113,43 @@ class AudioEngine {
       html5: false,
       volume: this.effectiveVolume(),
       onload: () => {
-        if (this.state.clueId !== clueId) return
+        if (this.loadGeneration !== generation) return
         const resume = this.readStoredPosition(clueId)
         this.howl?.seek(resume ?? media.startAtSeconds)
         this.setState({ status: 'ready' })
       },
       onloaderror: (_id, err) => {
-        if (this.state.clueId !== clueId) return
+        if (this.loadGeneration !== generation) return
+        if (attempt < MAX_LOAD_ATTEMPTS) {
+          this.retryTimeout = window.setTimeout(() => {
+            if (this.loadGeneration !== generation) return
+            this.retryTimeout = null
+            this.loadAttempt(clueId, media, attempt + 1)
+          }, RETRY_DELAY_MS * attempt)
+          return
+        }
         this.setState({ status: 'error', error: `Lyd kunne ikke lastes (${String(err)})` })
       },
       onplayerror: (_id, err) => {
-        if (this.state.clueId !== clueId) return
+        if (this.loadGeneration !== generation) return
         this.setState({ status: 'error', error: `Avspilling feilet (${String(err)})` })
-        this.howl?.once('unlock', () => this.play())
+        this.howl?.once('unlock', () => {
+          if (this.loadGeneration !== generation) return
+          this.setState({ status: 'paused', error: null })
+          this.play()
+        })
       },
       onend: () => {
-        if (this.state.clueId !== clueId) return
+        if (this.loadGeneration !== generation) return
         this.setState({ status: 'paused' })
       },
     })
   }
 
   retry() {
-    if (this.clueId && this.media) this.load(this.clueId, this.media)
+    const clueId = this.clueId
+    const media = this.media
+    if (clueId && media) this.load(clueId, media)
   }
 
   play() {
@@ -155,6 +217,11 @@ class AudioEngine {
   }
 
   unload() {
+    this.loadGeneration += 1
+    if (this.retryTimeout !== null) {
+      window.clearTimeout(this.retryTimeout)
+      this.retryTimeout = null
+    }
     this.stopWatcher()
     if (this.howl) {
       this.howl.unload()

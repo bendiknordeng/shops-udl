@@ -40,6 +40,11 @@
     "avatar": "/media/participants/hakon-skirstad-grini.webp"
   },
   {
+    "id": "hauk",
+    "name": "Hauk",
+    "avatar": "/media/participants/hauk.png"
+  },
+  {
     "id": "jon-wilberg",
     "name": "Jon Kanon",
     "avatar": "/media/participants/jon-wilberg.webp"

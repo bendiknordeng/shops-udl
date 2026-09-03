@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react'
 import { useSelector } from '@xstate/react'
 import { useGame } from '../../app/GameProvider'
 import { remainingMs } from '../../game/timer'
-import { tick, timeUp } from '../../audio/sfx'
 import styles from './timer.module.css'
 
 const RADIUS = 54
@@ -12,18 +11,17 @@ const CIRCUMFERENCE = 2 * Math.PI * RADIUS
  * Stor, alltid synlig nedtelling. Beregner fra absolutt deadline via rAF —
  * React re-rendres ikke per frame; DOM oppdateres direkte.
  */
-export function Countdown() {
+export function Countdown({ onFinalTick }: { onFinalTick?: (seconds: number) => void }) {
   const { actorRef, send } = useGame()
   const timer = useSelector(actorRef, (s) => s.context.timer)
   const textRef = useRef<HTMLSpanElement>(null)
   const ringRef = useRef<SVGCircleElement>(null)
   const wrapRef = useRef<HTMLDivElement>(null)
   const expiredSentRef = useRef(false)
-  const lastWholeSecondRef = useRef<number | null>(null)
+  const lastSecondRef = useRef<number | null>(null)
 
   useEffect(() => {
     expiredSentRef.current = false
-    lastWholeSecondRef.current = null
     let frame = 0
 
     // Backup for skjulte faner: rAF stopper der, men setInterval kjører
@@ -44,6 +42,13 @@ export function Countdown() {
       const seconds = Math.ceil(ms / 1000)
       const fraction = Math.max(0, Math.min(1, ms / duration))
 
+      if (seconds !== lastSecondRef.current) {
+        lastSecondRef.current = seconds
+        if (timer.status === 'running' && seconds >= 1 && seconds <= 3) {
+          onFinalTick?.(seconds)
+        }
+      }
+
       if (textRef.current) textRef.current.textContent = String(seconds)
       if (ringRef.current) {
         ringRef.current.style.strokeDashoffset = String(CIRCUMFERENCE * (1 - fraction))
@@ -54,14 +59,8 @@ export function Countdown() {
       }
 
       if (timer.status === 'running') {
-        // Tikkelyd de siste fem sekundene — økende rytme og spenning.
-        if (seconds <= 5 && seconds >= 1 && seconds !== lastWholeSecondRef.current) {
-          lastWholeSecondRef.current = seconds
-          tick(seconds <= 3)
-        }
         if (ms <= 0 && !expiredSentRef.current) {
           expiredSentRef.current = true
-          timeUp()
           send({ type: 'COUNTDOWN_EXPIRED' })
           return
         }
@@ -74,7 +73,7 @@ export function Countdown() {
       cancelAnimationFrame(frame)
       if (expiryBackup !== null) window.clearInterval(expiryBackup)
     }
-  }, [timer, send])
+  }, [timer, send, onFinalTick])
 
   return (
     <div ref={wrapRef} className={styles.countdown} data-urgency="calm">

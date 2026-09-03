@@ -17,6 +17,7 @@ export function createInitialContext(pack: GamePack): GameContext {
     activeTeamIndex: 0,
     nameHistory: [],
     usedClueIds: [],
+    clueResults: {},
     activeClueId: null,
     timer: idleTimer,
     revealed: false,
@@ -72,6 +73,10 @@ export function createGameMachine(pack: GamePack) {
         return {
           teams: applyAwardToTeams(context.teams, event.teamId, clue.value),
           usedClueIds: [...context.usedClueIds, clue.id],
+          clueResults: {
+            ...(context.clueResults ?? {}),
+            [clue.id]: { kind: 'award', teamId: event.teamId },
+          },
           lastOutcome: { kind: 'award', teamId: event.teamId, clueId: clue.id, value: clue.value } as const,
           timer: stopTimer(context.timer),
         }
@@ -81,6 +86,10 @@ export function createGameMachine(pack: GamePack) {
         if (!clue) return {}
         return {
           usedClueIds: [...context.usedClueIds, clue.id],
+          clueResults: {
+            ...(context.clueResults ?? {}),
+            [clue.id]: { kind: 'none' },
+          },
           lastOutcome: { kind: 'none', clueId: clue.id } as const,
           timer: stopTimer(context.timer),
         }
@@ -102,13 +111,16 @@ export function createGameMachine(pack: GamePack) {
         timer: ({ context }) => startTimer(context.answerSeconds),
         mediaError: null,
       }),
-      setClueUsed: assign({
-        usedClueIds: ({ context, event }) => {
-          if (event.type !== 'SET_CLUE_USED') return context.usedClueIds
-          if (!pack.clues.some((c) => c.id === event.clueId)) return context.usedClueIds
-          const without = context.usedClueIds.filter((id) => id !== event.clueId)
-          return event.used ? [...without, event.clueId] : without
-        },
+      setClueUsed: assign(({ context, event }) => {
+        if (event.type !== 'SET_CLUE_USED') return {}
+        if (!pack.clues.some((c) => c.id === event.clueId)) return {}
+        const without = context.usedClueIds.filter((id) => id !== event.clueId)
+        const clueResults = { ...(context.clueResults ?? {}) }
+        if (!event.used) delete clueResults[event.clueId]
+        return {
+          usedClueIds: event.used ? [...without, event.clueId] : without,
+          clueResults,
+        }
       }),
     },
   }).createMachine({
@@ -248,8 +260,14 @@ export function createGameMachine(pack: GamePack) {
           // når presentasjonen er klar (GAME_SPEC §8.1).
           presenting: {
             on: {
-              PRESENTATION_READY: { target: 'active', actions: 'beginCountdown' },
+              PRESENTATION_READY: { target: 'ready' },
               SKIP_MEDIA: { target: 'active', actions: 'beginCountdown' },
+            },
+          },
+          // Media er ferdig lastet, men holdes tilbake til spørsmålet startes.
+          ready: {
+            on: {
+              START_CLUE: { target: 'active', actions: 'beginCountdown' },
             },
           },
           // Aktiv svarfase — kun laget som valgte ruten har svarrett.

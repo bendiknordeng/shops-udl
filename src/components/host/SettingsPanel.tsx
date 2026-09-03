@@ -45,18 +45,6 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
           />
           <span className={styles.sliderValue}>{Math.round(settings.mediaVolume * 100)}%</span>
         </div>
-        <div className={styles.sliderRow}>
-          Effekter
-          <input
-            type="range"
-            min={0}
-            max={1}
-            step={0.05}
-            value={settings.sfxVolume}
-            onChange={(e) => updateSettings({ sfxVolume: Number(e.target.value) })}
-          />
-          <span className={styles.sliderValue}>{Math.round(settings.sfxVolume * 100)}%</span>
-        </div>
         <label className={styles.checkboxRow}>
           <input
             type="checkbox"

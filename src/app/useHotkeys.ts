@@ -21,11 +21,22 @@ export function useHotkeys() {
         return
       }
       const inClue = typeof snapshot.value === 'object' && snapshot.value !== null && 'clue' in snapshot.value
+      const clueStarted =
+        snapshot.matches({ clue: 'active' }) ||
+        snapshot.matches({ clue: 'open' }) ||
+        snapshot.matches({ clue: 'decided' })
       const clue = getClue(pack, snapshot.context.activeClueId)
 
       switch (e.key) {
         case 'Escape':
           if (sceneBus.skipAll()) e.preventDefault()
+          break
+        case 'x':
+        case 'X':
+          if (inClue && !snapshot.matches({ clue: 'decided' })) {
+            e.preventDefault()
+            send({ type: 'CANCEL_CLUE' })
+          }
           break
         case ' ':
           if (inClue && clue && clue.media.kind === 'audio') {
@@ -46,11 +57,11 @@ export function useHotkeys() {
           break
         case 'f':
         case 'F':
-          if (inClue) send({ type: snapshot.context.revealed ? 'HIDE_ANSWER' : 'REVEAL_ANSWER' })
+          if (clueStarted) send({ type: snapshot.context.revealed ? 'HIDE_ANSWER' : 'REVEAL_ANSWER' })
           break
         case 'm':
         case 'M':
-          if (inClue && clue?.media.kind === 'image') send({ type: 'TOGGLE_MEDIA_HIDDEN' })
+          if (clueStarted && clue?.media.kind === 'image') send({ type: 'TOGGLE_MEDIA_HIDDEN' })
           break
         case 'b':
         case 'B':
@@ -77,5 +88,5 @@ export const HOTKEY_HELP: { key: string; label: string }[] = [
   { key: 'M', label: 'Skjul / vis bilde' },
   { key: 'B', label: 'Tilbake til brettet' },
   { key: 'U', label: 'Angre siste poenghandling' },
-  { key: 'Esc', label: 'Hopp over animasjon' },
+  { key: 'X', label: 'Avbryt aktiv rute' },
 ]

@@ -20,7 +20,6 @@ import {
   setSetting,
 } from '../storage/persistence'
 import { audioEngine } from '../audio/audio-engine'
-import { setSfxVolume } from '../audio/sfx'
 import { setReducedEffects } from './motion'
 import { SETTINGS_KEY, type AppSettings } from './settings'
 
@@ -94,10 +93,10 @@ export function GameProvider({ pack, initialSnapshot, initialUndoStack, initialS
     createRunningActor(machine, initialSnapshot),
   )
 
-  // Anvend innstillinger på lyd- og effektlagene.
+  // Anvend innstillinger på media- og effektlagene.
   useEffect(() => {
+    audioEngine.prepare()
     audioEngine.setMediaVolume(settings.mediaVolume)
-    setSfxVolume(settings.sfxVolume)
     setReducedEffects(settings.reducedEffects)
   }, [settings])
 

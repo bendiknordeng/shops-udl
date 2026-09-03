@@ -24,6 +24,8 @@ export type LastOutcome =
   | { kind: 'none'; clueId: string }
   | null
 
+export type ClueResult = { kind: 'award'; teamId: string } | { kind: 'none' }
+
 export type GameContext = {
   packId: string
   packVersion: string
@@ -36,6 +38,7 @@ export type GameContext = {
   /** Tidligere navnesett, for «gå tilbake til forrige navnesett». */
   nameHistory: string[][]
   usedClueIds: string[]
+  clueResults: Record<string, ClueResult>
   activeClueId: string | null
   timer: TimerState
   revealed: boolean

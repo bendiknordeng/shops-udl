@@ -111,7 +111,7 @@ ikke bare farge. Brettet skal ha en kompakt tegnforklaring.
 
 ### 4.1 Forhåndsdefinert deltakerliste
 
-Spillpakken har 17 deltakere registrert i `src/content/participants.json`.
+Spillpakken har 18 deltakere registrert i `src/content/participants.json`.
 Hver deltaker har:
 
 - stabil ID;
