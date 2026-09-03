@@ -100,8 +100,7 @@ aktiv rute, uten at den havner i hovedvinduets DOM.
   markere ruten brukt og uten å flytte turen.
 - **Rekonstruer brett** (Innstillinger / vertsvinduets «Innstillinger og
   poengjustering»): marker enkeltruter brukt/ubrukt manuelt. Angres med `U`.
-- **Tilbake til brettet** fra oppsummeringen, hvis en rute markeres ubrukt
-  etter at alle var spilt.
+- **Se brettet** fra sluttskjermen for å inspisere eller korrigere spillet.
 - Kombinér med manuell poengjustering og «Sett tur» for å gjenskape en
   komplett spilltilstand.
 

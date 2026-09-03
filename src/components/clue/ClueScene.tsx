@@ -47,8 +47,6 @@ export function ClueScene() {
   const previousAudioStatusRef = useRef(audioEngine.getState().status)
   const exitingRef = useRef(false)
 
-  const chooserTeam = context.teams[context.activeTeamIndex] ?? null
-
   // Ruten løfter seg og ekspanderer til scene — fra klikket rute-rektangel.
   useGSAP(
     () => {
@@ -283,23 +281,13 @@ export function ClueScene() {
 
   if (!clue || !category) return null
 
-  const reviewResult = context.clueResults?.[clue.id]
-  let reviewOutcome = 'Ingen poengtildeling registrert'
-  if (reviewResult?.kind === 'none') reviewOutcome = 'Ingen fikk poeng'
-  if (reviewResult?.kind === 'award') {
-    const team = context.teams.find((candidate) => candidate.id === reviewResult.teamId)
-    reviewOutcome = team
-      ? `${team.name} fikk ${clue.value} poeng`
-      : `${clue.value} poeng ble delt ut`
-  }
-
   let phaseLabel = 'Ingen fikk riktig'
   if (phase === 'presenting') phaseLabel = 'Gjør klar …'
   else if (phase === 'ready') phaseLabel = ''
-  else if (phase === 'active') phaseLabel = `Svarfase — ${chooserTeam?.name ?? ''}`
+  else if (phase === 'active') phaseLabel = ''
   else if (phase === 'answerDelay') phaseLabel = ''
   else if (phase === 'open') phaseLabel = ''
-  else if (phase === 'review') phaseLabel = `Fasit: ${clue.answer} · ${reviewOutcome}`
+  else if (phase === 'review') phaseLabel = ''
   else if (context.lastOutcome?.kind === 'award') phaseLabel = 'Poeng delt ut'
 
   const showMediaError =
@@ -405,14 +393,24 @@ export function ClueScene() {
         </div>
       )}
 
-      {phase === 'open' && context.answerWindowTimer?.status === 'running' && (
-        <div className={styles.answerWindowRow}>
-          <AnswerWindowCountdown />
+      {revealMounted && (
+        <div className={styles.revealLayer}>
+          <AnswerReveal
+            clue={clue}
+            visible={context.revealed}
+            onHidden={() => setRevealMounted(false)}
+          />
         </div>
       )}
 
       <div className={styles.body}>
         <div ref={flashRef} className={styles.expiredFlash} />
+
+        {phase === 'open' && context.answerWindowTimer?.status === 'running' && (
+          <div className={styles.answerWindowRow}>
+            <AnswerWindowCountdown />
+          </div>
+        )}
 
         {mediaContent}
 
@@ -438,16 +436,6 @@ export function ClueScene() {
               Ingen poeng denne runden
             </span>
           )}
-        </div>
-      )}
-
-      {revealMounted && (
-        <div className={styles.revealLayer}>
-          <AnswerReveal
-            clue={clue}
-            visible={context.revealed}
-            onHidden={() => setRevealMounted(false)}
-          />
         </div>
       )}
 

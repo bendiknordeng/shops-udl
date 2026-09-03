@@ -1,8 +1,10 @@
+import type { ClueType } from '../content/schemas'
 import type { Team } from './types'
 
 export type GameEvent =
   | { type: 'SET_TEAM_COUNT'; count: number }
   | { type: 'SET_ANSWER_SECONDS'; seconds: number }
+  | { type: 'SET_CLUE_TYPE_ANSWER_SECONDS'; clueType: ClueType; seconds: number }
   | { type: 'SET_ANSWER_WINDOW_SECONDS'; seconds: number }
   // Tilfeldighet beregnes i UI-laget (allocate-teams.ts) slik at maskinen er deterministisk.
   | { type: 'DRAW_TEAMS'; teams: Team[]; manual: boolean }
@@ -40,10 +42,9 @@ export type GameEvent =
   | { type: 'SET_CLUE_USED'; clueId: string; used: boolean }
   // Host-styrt retur fra oppsummeringen til brettet (etter rekonstruksjon).
   | { type: 'BACK_TO_BOARD' }
+  | { type: 'VIEW_RESULTS' }
   | { type: 'CHANGE_ACTIVE_TEAM'; teamIndex: number }
   | { type: 'ADJUST_SCORE'; teamId: string; delta: number }
-  | { type: 'START_FINALE' }
-  | { type: 'BACK_TO_SUMMARY' }
 
 /** Events som utløser undo-snapshot før de sendes (poeng-/avgjørelseshandlinger). */
 export const UNDOABLE_EVENTS: ReadonlySet<GameEvent['type']> = new Set([

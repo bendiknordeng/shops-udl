@@ -23,6 +23,7 @@ import styles from './remote.module.css'
 
 const STALE_MS = 4000
 const AWARD_CONFIRM_WINDOW_MS = 1500
+const REVEAL_CONFIRM_WINDOW_MS = 1500
 
 const PHASE_LABELS: Record<ReturnType<typeof remotePhase>, string> = {
   setup: 'Oppsett (styres i hovedvinduet)',
@@ -41,6 +42,7 @@ const PHASE_LABELS: Record<ReturnType<typeof remotePhase>, string> = {
 
 type PendingDecision = { kind: 'award'; teamId: string } | { kind: 'none' } | null
 type PendingAwardShortcut = { key: string; clueId: string; pressedAt: number }
+type PendingRevealShortcut = { clueId: string; pressedAt: number }
 
 /**
  * VERTSVINDUET: privat fjernkontroll i egen popup/fane (?host=1).
@@ -56,6 +58,7 @@ export function RemoteHostWindow({ pack }: { pack: GamePack }) {
   const channelRef = useRef<BroadcastChannel | null>(null)
   const lastSeenRef = useRef(0)
   const pendingAwardRef = useRef<PendingAwardShortcut | null>(null)
+  const pendingRevealRef = useRef<PendingRevealShortcut | null>(null)
   const [boardMode, setBoardMode] = useState<BoardKeyboardSelection['mode']>('column')
   const [boardSelection, setBoardSelection] = useState<BoardKeyboardSelection | null>(null)
 
@@ -106,6 +109,7 @@ export function RemoteHostWindow({ pack }: { pack: GamePack }) {
     phase === 'review'
   const clueStarted = phase === 'active' || phase === 'open' || phase === 'decided'
   const canDecide = phase === 'active' || phase === 'open'
+  const canRevealWithShortcut = phase === 'active' || phase === 'open'
   const activeTeam = context?.teams[context.activeTeamIndex] ?? null
   const answerWindowSeconds = context?.answerWindowSeconds ?? DEFAULT_ANSWER_WINDOW_SECONDS
 
@@ -124,6 +128,8 @@ export function RemoteHostWindow({ pack }: { pack: GamePack }) {
       if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
         return
       }
+      const revealShortcutKey = e.key === 'f' || e.key === 'F'
+      if (!revealShortcutKey) pendingRevealRef.current = null
       if (phase === 'board' && e.key === "'") {
         if (e.metaKey || e.ctrlKey || e.altKey) return
         e.preventDefault()
@@ -188,6 +194,30 @@ export function RemoteHostWindow({ pack }: { pack: GamePack }) {
         if (!e.repeat) sendEvent({ type: 'RESET_CLUE_AWARD' })
         return
       }
+      if (revealShortcutKey && canRevealWithShortcut && context && clue) {
+        if (e.metaKey || e.ctrlKey || e.altKey) return
+        e.preventDefault()
+        if (e.repeat) return
+        if (context.revealed) {
+          pendingRevealRef.current = null
+          sendEvent({ type: 'HIDE_ANSWER' })
+          return
+        }
+
+        const now = Date.now()
+        const pendingReveal = pendingRevealRef.current
+        const confirmed =
+          pendingReveal?.clueId === clue.id &&
+          now - pendingReveal.pressedAt <= REVEAL_CONFIRM_WINDOW_MS
+        if (!confirmed) {
+          pendingRevealRef.current = { clueId: clue.id, pressedAt: now }
+          return
+        }
+
+        pendingRevealRef.current = null
+        sendEvent({ type: 'REVEAL_ANSWER' })
+        return
+      }
       if (!canDecide || !context || !clue) {
         pendingAwardRef.current = null
         return
@@ -224,7 +254,7 @@ export function RemoteHostWindow({ pack }: { pack: GamePack }) {
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [boardMode, boardSelection, canDecide, clue, context, pack, phase])
+  }, [boardMode, boardSelection, canDecide, canRevealWithShortcut, clue, context, pack, phase])
 
   if (!state || !context) {
     return (
@@ -316,6 +346,15 @@ export function RemoteHostWindow({ pack }: { pack: GamePack }) {
               else sendEvent({ type: 'OPEN_CLUE', clueId })
             }}
           />
+          {pack.clues.every((clue) => context.usedClueIds.includes(clue.id)) && (
+            <button
+              type="button"
+              className={`${styles.button} ${styles.buttonPrimary}`}
+              onClick={() => sendEvent({ type: 'VIEW_RESULTS' })}
+            >
+              Se resultater
+            </button>
+          )}
         </div>
       )}
 
@@ -506,26 +545,10 @@ export function RemoteHostWindow({ pack }: { pack: GamePack }) {
         </>
       )}
 
-      {phase === 'summary' && (
-        <div className={styles.section}>
-          <div className={styles.row}>
-            <button
-              type="button"
-              className={`${styles.button} ${styles.buttonPrimary}`}
-              onClick={() => sendEvent({ type: 'START_FINALE' })}
-            >
-              Start finalen
-            </button>
-            <button type="button" className={styles.button} onClick={() => sendEvent({ type: 'BACK_TO_BOARD' })}>
-              ← Tilbake til brettet
-            </button>
-          </div>
-        </div>
-      )}
       {phase === 'finale' && (
         <div className={styles.section}>
-          <button type="button" className={styles.button} onClick={() => sendEvent({ type: 'BACK_TO_SUMMARY' })}>
-            Tilbake til oppsummering (poengretting)
+          <button type="button" className={styles.button} onClick={() => sendEvent({ type: 'BACK_TO_BOARD' })}>
+            Se brettet
           </button>
         </div>
       )}
@@ -550,7 +573,7 @@ export function RemoteHostWindow({ pack }: { pack: GamePack }) {
           <summary>Innstillinger og poengjustering</summary>
           <div className={styles.detailsBody}>
             <div className={styles.sliderRow}>
-              Svartid
+              Spørsmålstid
               <input
                 type="range"
                 min={pack.presentation.minAnswerSeconds}

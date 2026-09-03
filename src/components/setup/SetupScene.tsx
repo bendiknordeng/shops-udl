@@ -21,6 +21,12 @@ import { teamColorStyle } from '../../game/team-colors'
 import { Avatar, preloadAvatars } from '../common/Avatar'
 import styles from './setup.module.css'
 
+const QUESTION_TYPE_TIME_CONTROLS = [
+  { type: 'image', label: 'Bilde' },
+  { type: 'ai-song', label: 'AI-sang' },
+  { type: 'song', label: 'Sang' },
+] as const
+
 export function SetupScene() {
   const { pack, actorRef, send } = useGame()
   const context = useSelector(actorRef, (s) => s.context)
@@ -33,6 +39,11 @@ export function SetupScene() {
   const teamsDrawn = context.teams.length > 0
   const manual = pack.manualTeams !== null
   const answerWindowSeconds = context.answerWindowSeconds ?? DEFAULT_ANSWER_WINDOW_SECONDS
+  const answerSecondsByType = context.answerSecondsByType ?? {
+    image: context.answerSeconds,
+    'ai-song': context.answerSeconds,
+    song: context.answerSeconds,
+  }
   const spotlightParticipant =
     spotlightParticipantId == null ? null : getParticipant(pack, spotlightParticipantId)
   const presentationTeam =
@@ -209,7 +220,7 @@ export function SetupScene() {
         )}
 
         <div className={styles.controlGroup}>
-          <span className={styles.controlLabel}>Svartid</span>
+          <span className={styles.controlLabel}>Spørsmålstid</span>
           <div className={styles.sliderWrap}>
             <input
               type="range"
@@ -219,10 +230,36 @@ export function SetupScene() {
               step={pack.presentation.answerSecondsStep}
               value={context.answerSeconds}
               onChange={(e) => send({ type: 'SET_ANSWER_SECONDS', seconds: Number(e.target.value) })}
-              aria-label="Svartid i sekunder"
+              aria-label="Spørsmålstid i sekunder"
             />
             <span className={styles.sliderValue}>{context.answerSeconds} s</span>
           </div>
+          <details className={styles.advancedTimeSettings}>
+            <summary>Avanserte innstillinger</summary>
+            <div className={styles.advancedTimeGrid}>
+              {QUESTION_TYPE_TIME_CONTROLS.map(({ type, label }) => (
+                <label key={type} className={styles.advancedTimeRow}>
+                  <span>{label}</span>
+                  <input
+                    type="range"
+                    className={styles.slider}
+                    min={pack.presentation.minAnswerSeconds}
+                    max={pack.presentation.maxAnswerSeconds}
+                    step={pack.presentation.answerSecondsStep}
+                    value={answerSecondsByType[type]}
+                    onChange={(e) =>
+                      send({
+                        type: 'SET_CLUE_TYPE_ANSWER_SECONDS',
+                        clueType: type,
+                        seconds: Number(e.target.value),
+                      })
+                    }
+                  />
+                  <strong>{answerSecondsByType[type]} s</strong>
+                </label>
+              ))}
+            </div>
+          </details>
         </div>
 
         <div className={styles.controlGroup}>
@@ -255,7 +292,7 @@ export function SetupScene() {
               aria-label={`Vis stort bilde av ${p.name}`}
               onClick={() => setSpotlightParticipantId(p.id)}
             >
-              <Avatar participant={p} size={64} />
+              <Avatar participant={p} size={160} />
               <span>{p.name}</span>
             </button>
           ))}
@@ -307,7 +344,7 @@ export function SetupScene() {
                       aria-label={`Vis stort bilde av ${participant.name}`}
                       onClick={() => setSpotlightParticipantId(participant.id)}
                     >
-                      <Avatar participant={participant} size={58} />
+                      <Avatar participant={participant} size={92} />
                       <span>{participant.name}</span>
                     </button>
                   )

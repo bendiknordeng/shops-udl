@@ -73,6 +73,7 @@ export const gamePackDefinition: GamePackDefinition = {
       type: 'ai-song',
       answer: 'High School Musical',
       acceptedAnswers: [],
+      revealTitle: 'Breaking Free',
       media: { kind: 'audio', src: '/media/audio/k1-200.mp3', fadeInMs: 400, fadeOutMs: 600 },
     },
     {
@@ -91,6 +92,7 @@ export const gamePackDefinition: GamePackDefinition = {
       type: 'ai-song',
       answer: 'Transformers',
       acceptedAnswers: [],
+      bonusInfo: 'Monolog Optimus Prime',
       media: { kind: 'audio', src: '/media/audio/k1-400.mp3', fadeInMs: 400, fadeOutMs: 600 },
     },
     {
@@ -111,6 +113,7 @@ export const gamePackDefinition: GamePackDefinition = {
       type: 'song',
       answer: 'Down Under',
       acceptedAnswers: [],
+      revealArtist: 'Men at Work',
       media: { kind: 'audio', src: '/media/audio/k2-100.mp3', fadeInMs: 300, fadeOutMs: 600 },
     },
     {
@@ -129,6 +132,7 @@ export const gamePackDefinition: GamePackDefinition = {
       type: 'image',
       answer: 'Amsterdam',
       acceptedAnswers: [],
+      bonusInfo: 'Furu = Probe',
       media: { kind: 'image', src: '/media/images/k2-300.png' },
     },
     {
@@ -138,6 +142,7 @@ export const gamePackDefinition: GamePackDefinition = {
       type: 'image',
       answer: 'Singapore',
       acceptedAnswers: [],
+      bonusInfo: 'Marina Bay Sands',
       media: { kind: 'image', src: '/media/images/k2-400.png' },
     },
     {
@@ -147,6 +152,7 @@ export const gamePackDefinition: GamePackDefinition = {
       type: 'image',
       answer: 'Budapest',
       acceptedAnswers: [],
+      bonusInfo: 'Buddha + pest',
       media: { kind: 'image', src: '/media/images/k2-500.jpeg' },
     },
 
@@ -159,6 +165,7 @@ export const gamePackDefinition: GamePackDefinition = {
       answer: 'Fødsel',
       acceptedAnswers: [],
       revealTitle: 'Circle of Life',
+      bonusInfo: 'Løvenes konge',
       media: { kind: 'audio', src: '/media/audio/k3-100.mp3', fadeInMs: 300, fadeOutMs: 600 },
     },
     {
@@ -188,7 +195,7 @@ export const gamePackDefinition: GamePackDefinition = {
       type: 'image',
       answer: 'Bryllup',
       acceptedAnswers: [],
-      explanation: 'Gammelt, nytt, lånt og blått',
+      explanation: 'Noe gammelt, noe nytt, noe lånt og noe blått',
       media: { kind: 'image', src: '/media/images/k3-400.png' },
     },
     {
@@ -219,6 +226,7 @@ export const gamePackDefinition: GamePackDefinition = {
       type: 'image',
       answer: 'Cuba Libre',
       acceptedAnswers: [],
+      bonusInfo: 'Fidel Castro',
       media: { kind: 'image', src: '/media/images/k4-200.png' },
     },
     {
@@ -278,7 +286,7 @@ export const gamePackDefinition: GamePackDefinition = {
       type: 'ai-song',
       answer: 'Ørn',
       acceptedAnswers: [],
-      revealTitle: 'Hotel California',
+      revealTitle: 'Eagles, Hotel California',
       media: { kind: 'audio', src: '/media/audio/k5-300.mp3', fadeInMs: 400, fadeOutMs: 600 },
     },
     {
@@ -288,6 +296,7 @@ export const gamePackDefinition: GamePackDefinition = {
       type: 'image',
       answer: 'Løve',
       acceptedAnswers: [],
+      bonusInfo: 'Stortinget og Løvebakken',
       media: { kind: 'image', src: '/media/images/k5-400.png' },
     },
     {

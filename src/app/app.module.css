@@ -44,6 +44,14 @@
   }
 }
 
+.appFrameFinale {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr auto;
+  grid-template-areas:
+    'stage'
+    'dock';
+}
+
 .fullScene {
   height: 100%;
   position: relative;

@@ -15,7 +15,6 @@ import { BoardScene } from '../components/board/BoardScene'
 import { ClueScene } from '../components/clue/ClueScene'
 import { Leaderboard } from '../components/scoreboard/Leaderboard'
 import { HostDock } from '../components/host/HostDock'
-import { SummaryScene } from '../components/finale/SummaryScene'
 import { FinaleScene } from '../components/finale/FinaleScene'
 import styles from './app.module.css'
 
@@ -200,7 +199,6 @@ function GameShell() {
 
   const inSetup = useSelector(actorRef, (s) => s.matches('setup'))
   const inClue = useSelector(actorRef, (s) => s.matches('clue'))
-  const inSummary = useSelector(actorRef, (s) => s.matches('summary'))
   const inFinale = useSelector(actorRef, (s) => s.matches('finale'))
 
   if (inSetup) {
@@ -220,16 +218,17 @@ function GameShell() {
   }
 
   return (
-    <div className={styles.appFrame}>
+    <div className={`${styles.appFrame} ${inFinale ? styles.appFrameFinale : ''}`}>
       <div className={styles.stageArea}>
         <BoardScene keyboardSelection={boardKeyboardSelection} />
         {inClue && <ClueScene />}
-        {inSummary && <SummaryScene />}
         {inFinale && <FinaleScene />}
       </div>
-      <div className={styles.sideArea}>
-        <Leaderboard />
-      </div>
+      {!inFinale && (
+        <div className={styles.sideArea}>
+          <Leaderboard />
+        </div>
+      )}
       <div className={styles.dockArea}>
         <HostDock remoteConnected={remoteConnected} />
       </div>

@@ -207,13 +207,6 @@
   justify-content: space-between;
 }
 
-.playbackDuration {
-  filter: blur(5px);
-  opacity: 0.72;
-  pointer-events: none;
-  user-select: none;
-}
-
 .languageHint {
   font-size: 14px;
   color: var(--ink-muted);
@@ -364,21 +357,26 @@
 
 .revealLayer {
   position: absolute;
-  inset: 0;
+  top: clamp(64px, 8vh, 92px);
+  right: clamp(12px, 2vh, 24px);
+  left: clamp(12px, 2vh, 24px);
   z-index: 6;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(12px, 2vh, 24px);
+  padding: 0;
   pointer-events: none;
 }
 
 .answerWindowRow {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 4;
   display: flex;
-  flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-  min-height: clamp(64px, 9vh, 94px);
+  height: clamp(64px, 9vh, 94px);
+  pointer-events: none;
 }
 
 .revealAnswer {

@@ -23,7 +23,7 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
   return (
     <div className={styles.panel}>
       <div className={styles.panelSection}>
-        <span className={styles.panelHeading}>Svartid (fra neste spørsmål)</span>
+        <span className={styles.panelHeading}>Spørsmålstid (fra neste spørsmål)</span>
         <div className={styles.sliderRow}>
           <input
             type="range"

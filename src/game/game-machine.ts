@@ -24,6 +24,11 @@ export function createInitialContext(pack: GamePack): GameContext {
     packVersion: pack.version,
     teamCount: pack.manualTeams ? pack.manualTeams.length : Math.min(...pack.allowedTeamCounts),
     answerSeconds: pack.defaultAnswerSeconds,
+    answerSecondsByType: {
+      image: pack.defaultAnswerSeconds,
+      'ai-song': pack.defaultAnswerSeconds,
+      song: pack.defaultAnswerSeconds,
+    },
     answerWindowSeconds: DEFAULT_ANSWER_WINDOW_SECONDS,
     teams: [],
     manualAllocation: false,
@@ -147,7 +152,13 @@ export function createGameMachine(pack: GamePack) {
           context.teams.length === 0 ? 0 : (context.activeTeamIndex + 1) % context.teams.length,
       }),
       beginCountdown: assign({
-        timer: ({ context }) => startTimer(context.answerSeconds),
+        timer: ({ context }) => {
+          const clue = findClue(pack, context.activeClueId)
+          const seconds = clue
+            ? (context.answerSecondsByType?.[clue.type] ?? context.answerSeconds)
+            : context.answerSeconds
+          return startTimer(seconds)
+        },
         answerWindowTimer: idleTimer,
         mediaError: null,
       }),
@@ -174,12 +185,31 @@ export function createGameMachine(pack: GamePack) {
     on: {
       SET_ANSWER_SECONDS: {
         // Gjelder fra neste spørsmål — aktiv nedtelling endres ikke (GAME_SPEC §6).
-        actions: assign({
-          answerSeconds: ({ event }) =>
-            Math.min(
-              pack.presentation.maxAnswerSeconds,
-              Math.max(pack.presentation.minAnswerSeconds, event.seconds),
-            ),
+        actions: assign(({ event }) => {
+          const seconds = Math.min(
+            pack.presentation.maxAnswerSeconds,
+            Math.max(pack.presentation.minAnswerSeconds, event.seconds),
+          )
+          return {
+            answerSeconds: seconds,
+            answerSecondsByType: { image: seconds, 'ai-song': seconds, song: seconds },
+          }
+        }),
+      },
+      SET_CLUE_TYPE_ANSWER_SECONDS: {
+        actions: assign(({ context, event }) => {
+          const seconds = Math.min(
+            pack.presentation.maxAnswerSeconds,
+            Math.max(pack.presentation.minAnswerSeconds, event.seconds),
+          )
+          const current = context.answerSecondsByType ?? {
+            image: context.answerSeconds,
+            'ai-song': context.answerSeconds,
+            song: context.answerSeconds,
+          }
+          return {
+            answerSecondsByType: { ...current, [event.clueType]: seconds },
+          }
         }),
       },
       SET_ANSWER_WINDOW_SECONDS: {
@@ -274,6 +304,10 @@ export function createGameMachine(pack: GamePack) {
 
       board: {
         on: {
+          VIEW_RESULTS: {
+            guard: 'allCluesUsed',
+            target: 'finale',
+          },
           // Rekonstruksjonsverktøy: sett brukt-status manuelt.
           SET_CLUE_USED: { actions: 'setClueUsed' },
           OPEN_CLUE: {
@@ -297,7 +331,7 @@ export function createGameMachine(pack: GamePack) {
                 event.type === 'OPEN_USED_CLUE' ? event.clueId : null,
               timer: idleTimer,
               answerWindowTimer: idleTimer,
-              revealed: false,
+              revealed: true,
               mediaHidden: false,
               mediaError: null,
               lastOutcome: null,
@@ -412,7 +446,7 @@ export function createGameMachine(pack: GamePack) {
               RETURN_TO_BOARD: [
                 {
                   guard: 'allCluesUsed',
-                  target: '#quiz.summary',
+                  target: '#quiz.finale',
                   actions: ['advanceTurn', 'clearClue'],
                 },
                 { target: '#quiz.board', actions: ['advanceTurn', 'clearClue'] },
@@ -430,19 +464,13 @@ export function createGameMachine(pack: GamePack) {
         },
       },
 
-      // Alle ruter brukt: oppsummering. Verten velger når finalen starter.
+      // Eldre lagrede økter i oppsummering går rett videre til sluttskjermen.
       summary: {
-        on: {
-          START_FINALE: 'finale',
-          SET_CLUE_USED: { actions: 'setClueUsed' },
-          // Host-styrt retur til brettet — f.eks. etter at en rute er
-          // markert ubrukt under rekonstruksjon av et tidligere spill.
-          BACK_TO_BOARD: 'board',
-        },
+        always: 'finale',
       },
 
       finale: {
-        on: { BACK_TO_SUMMARY: 'summary' },
+        on: { BACK_TO_BOARD: 'board' },
       },
     },
   })

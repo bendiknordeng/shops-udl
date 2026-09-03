@@ -8,13 +8,20 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   padding: clamp(16px, 4vh, 48px) clamp(16px, 4vw, 64px);
   gap: clamp(14px, 2.5vh, 28px);
 }
 
+@media (max-height: 900px) {
+  .scene {
+    justify-content: flex-start;
+  }
+}
+
 .title {
   font-family: var(--font-display);
-  font-size: clamp(44px, 7vw, 96px);
+  font-size: clamp(52px, 7.8vw, 112px);
   letter-spacing: 0.06em;
   line-height: 0.95;
   text-align: center;
@@ -116,23 +123,69 @@
   text-align: left;
 }
 
+.advancedTimeSettings {
+  width: 100%;
+  max-width: 320px;
+}
+
+.advancedTimeSettings summary {
+  cursor: pointer;
+  color: var(--ink-muted);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+
+.advancedTimeGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--tile-edge);
+  border-radius: var(--radius-m);
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.advancedTimeRow {
+  display: grid;
+  grid-template-columns: 58px minmax(120px, 1fr) 42px;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.advancedTimeRow .slider {
+  width: 100%;
+}
+
+.advancedTimeRow strong {
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 400;
+  text-align: right;
+}
+
 .pool {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 12px;
-  max-width: 980px;
+  gap: 16px;
+  width: 100%;
+  max-width: 1140px;
 }
 
 .poolItem {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 7px;
-  width: 86px;
-  padding: 7px 4px;
+  gap: 9px;
+  width: 176px;
+  padding: 9px 5px;
   border-radius: var(--radius-m);
-  font-size: 12px;
+  font-size: 14px;
   color: var(--ink-muted);
   text-align: center;
   transition:
@@ -154,10 +207,10 @@
 
 .teamsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 14px;
   width: 100%;
-  max-width: 1180px;
+  max-width: 1440px;
 }
 
 .teamCard {
@@ -225,7 +278,7 @@
 
 .teamMembers {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(76px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(108px, 1fr));
   gap: 8px;
 }
 
@@ -239,7 +292,7 @@
   border: 1px solid rgba(255, 233, 194, 0.08);
   border-radius: var(--radius-m);
   padding: 9px 6px 8px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--ink);
   transition:
     border-color var(--dur-fast),
@@ -266,6 +319,10 @@
   gap: 12px;
   justify-content: center;
   align-items: center;
+}
+
+.pool ~ .actionsRow {
+  margin-top: 20px;
 }
 
 .startHint {

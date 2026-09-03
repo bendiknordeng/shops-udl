@@ -13,12 +13,15 @@ import styles from './scoreboard.module.css'
  * også når et spørsmål er åpent (GAME_SPEC §7.1).
  */
 export function Leaderboard() {
-  const { pack, actorRef } = useGame()
+  const { pack, actorRef, send } = useGame()
   const [presentedTeamId, setPresentedTeamId] = useState<string | null>(null)
   const gameTeams = useSelector(actorRef, (s) => s.context.teams)
   const activeTeamIndex = useSelector(actorRef, (s) => s.context.activeTeamIndex)
   const activeTeamId = gameTeams[activeTeamIndex]?.id ?? null
+  const inBoard = useSelector(actorRef, (s) => s.matches('board'))
+  const usedClueIds = useSelector(actorRef, (s) => s.context.usedClueIds)
   const teams = sortedByScore(gameTeams)
+  const allCluesUsed = pack.clues.length > 0 && pack.clues.every((clue) => usedClueIds.includes(clue.id))
   const presentedTeam = teams.find((team) => team.id === presentedTeamId) ?? null
   const presentedRank = presentedTeam ? teams.findIndex((team) => team.id === presentedTeam.id) + 1 : 0
   const presentedTeamIndex = presentedTeam
@@ -72,6 +75,15 @@ export function Leaderboard() {
             </button>
           )
         })}
+        {inBoard && allCluesUsed && (
+          <button
+            type="button"
+            className={`stageButton ${styles.resultsButton}`}
+            onClick={() => send({ type: 'VIEW_RESULTS' })}
+          >
+            Se resultater
+          </button>
+        )}
       </aside>
 
       {presentedTeam &&

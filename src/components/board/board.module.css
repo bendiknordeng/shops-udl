@@ -244,7 +244,7 @@
   position: absolute;
   inset: 0;
   z-index: -2;
-  background: linear-gradient(180deg, rgba(8, 2, 18, 0.03) 12%, rgba(8, 2, 18, 0.7) 82%);
+  background: linear-gradient(180deg, transparent 18%, rgba(8, 2, 18, 0.48) 88%);
 }
 
 .usedClueValue {

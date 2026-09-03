@@ -38,9 +38,7 @@ export function PlaybackProgress() {
       </div>
       <div className={styles.playbackTimes}>
         <span ref={elapsedRef}>0:00</span>
-        <span ref={durationRef} className={styles.playbackDuration} aria-hidden="true">
-          0:00
-        </span>
+        <span ref={durationRef}>0:00</span>
       </div>
     </div>
   )

@@ -111,6 +111,12 @@ export function BoardScene({ keyboardSelection }: { keyboardSelection: BoardKeyb
               if (keyboardHighlighted) {
                 Object.assign(tileStyle, { '--keyboard-step': keyboardStep })
               }
+              const revealCredit = clue
+                ? [clue.revealTitle, clue.revealArtist].filter(Boolean).join(' — ')
+                : ''
+              const extraInfo = clue
+                ? [clue.explanation, revealCredit, clue.bonusInfo].filter(Boolean).join(' · ')
+                : ''
               let ariaLabel = 'Tom rute'
               if (clue) ariaLabel = `${category.title} ${value} poeng, ${TYPE_LABELS[clue.type]}`
               if (clue && used) ariaLabel = `${ariaLabel}. Fasit: ${clue.answer}`
@@ -165,9 +171,9 @@ export function BoardScene({ keyboardSelection }: { keyboardSelection: BoardKeyb
                       <span className={styles.usedClueNoScore}>Ingen poeng</span>
                     )}
                     <strong className={styles.usedClueAnswer}>{clue.answer}</strong>
-                    {clue.media.kind === 'audio' && (clue.revealTitle || clue.revealArtist) && (
+                    {extraInfo && (
                       <span className={styles.usedClueMeta}>
-                        {[clue.revealTitle, clue.revealArtist].filter(Boolean).join(' · ')}
+                        {extraInfo}
                       </span>
                     )}
                   </span>

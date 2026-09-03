@@ -166,6 +166,18 @@
   line-height: 1;
 }
 
+.resultsButton {
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  margin-top: auto;
+  flex-shrink: 0;
+  border-color: var(--gold);
+  box-shadow:
+    0 -12px 26px rgba(7, 2, 18, 0.88),
+    0 0 22px rgba(255, 182, 40, 0.28);
+}
+
 .presentationBackdrop {
   position: fixed;
   z-index: 1000;

@@ -6,9 +6,15 @@ import { sceneBus } from './scene-bus'
 import { boardColumns, getClue, sortedByScore } from '../game/selectors'
 
 const AWARD_CONFIRM_WINDOW_MS = 1500
+const REVEAL_CONFIRM_WINDOW_MS = 1500
 
 type PendingAwardShortcut = {
   key: string
+  clueId: string
+  pressedAt: number
+}
+
+type PendingRevealShortcut = {
   clueId: string
   pressedAt: number
 }
@@ -26,6 +32,7 @@ export function useHotkeys() {
   const { actorRef, send, undo, pack } = useGame()
   const snapshot = useSelector(actorRef, (s) => s)
   const pendingAwardRef = useRef<PendingAwardShortcut | null>(null)
+  const pendingRevealRef = useRef<PendingRevealShortcut | null>(null)
   const [boardMode, setBoardMode] = useState<BoardKeyboardSelection['mode']>('column')
   const [boardSelection, setBoardSelection] = useState<BoardKeyboardSelection | null>(null)
 
@@ -40,9 +47,13 @@ export function useHotkeys() {
         snapshot.matches({ clue: 'active' }) ||
         snapshot.matches({ clue: 'open' }) ||
         snapshot.matches({ clue: 'decided' })
+      const canRevealWithShortcut =
+        snapshot.matches({ clue: 'active' }) || snapshot.matches({ clue: 'open' })
       const clue = getClue(pack, snapshot.context.activeClueId)
       const canAward = snapshot.matches({ clue: 'active' }) || snapshot.matches({ clue: 'open' })
       const onBoard = snapshot.matches('board')
+      const revealShortcutKey = e.key === 'f' || e.key === 'F'
+      if (!revealShortcutKey) pendingRevealRef.current = null
 
       if (onBoard && e.key === "'") {
         if (e.metaKey || e.ctrlKey || e.altKey) return
@@ -219,9 +230,31 @@ export function useHotkeys() {
           if (snapshot.matches({ clue: 'active' })) send({ type: 'OPEN_ANSWER_PHASE' })
           break
         case 'f':
-        case 'F':
-          if (clueStarted) send({ type: snapshot.context.revealed ? 'HIDE_ANSWER' : 'REVEAL_ANSWER' })
+        case 'F': {
+          if (!canRevealWithShortcut || !clue) break
+          if (e.metaKey || e.ctrlKey || e.altKey) break
+          e.preventDefault()
+          if (e.repeat) break
+          if (snapshot.context.revealed) {
+            pendingRevealRef.current = null
+            send({ type: 'HIDE_ANSWER' })
+            break
+          }
+
+          const now = Date.now()
+          const pendingReveal = pendingRevealRef.current
+          const confirmed =
+            pendingReveal?.clueId === clue.id &&
+            now - pendingReveal.pressedAt <= REVEAL_CONFIRM_WINDOW_MS
+          if (!confirmed) {
+            pendingRevealRef.current = { clueId: clue.id, pressedAt: now }
+            break
+          }
+
+          pendingRevealRef.current = null
+          send({ type: 'REVEAL_ANSWER' })
           break
+        }
         case 'm':
         case 'M':
           if (clueStarted && clue?.media.kind === 'image') send({ type: 'TOGGLE_MEDIA_HIDDEN' })
@@ -277,7 +310,7 @@ export const HOTKEY_HELP: { key: string; label: string }[] = [
   { key: '→', label: '−5 s tid / 5 s frem i sang' },
   { key: 'K', label: 'Pause / fortsett nedtelling' },
   { key: 'O', label: 'Gå til åpen svarfase' },
-  { key: 'F', label: 'Vis / skjul fasit' },
+  { key: 'F ×2 / F', label: 'Vis / skjul fasit i aktivt spørsmål' },
   { key: 'M', label: 'Skjul / vis bilde' },
   { key: 'B', label: 'Tilbake til brettet' },
   { key: 'R', label: 'Trekk tilbake poeng på aktivt spørsmål' },

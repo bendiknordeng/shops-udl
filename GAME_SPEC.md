@@ -519,8 +519,7 @@ Krav til spillpakken:
 
 ## 15. Spillslutt
 
-Når alle ruter er brukt, går appen ikke automatisk direkte til vinnersekvens.
-Verten får en oppsummering og velger når finalescenen starter.
+Når alle ruter er brukt, går appen direkte til vinnersekvensen.
 
 Foreløpig finalescene:
 
@@ -529,7 +528,7 @@ Foreløpig finalescene:
 - alle vinneravatarer vises;
 - lagnavn og sluttscore avsløres;
 - celebratory scene spilles;
-- verten kan gå tilbake for poengretting.
+- verten kan velge «Se brettet» for å åpne brettet igjen.
 
 Uavgjort og eventuell finalerunde er ikke definert ennå.
 

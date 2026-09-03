@@ -6,6 +6,7 @@ import { useGame } from '../../app/GameProvider'
 import { dur } from '../../app/motion'
 import { sceneBus } from '../../app/scene-bus'
 import { getParticipant, sortedByScore, winners } from '../../game/selectors'
+import { teamColorStyle } from '../../game/team-colors'
 import { launchConfetti } from '../../effects/confetti'
 import { Avatar } from '../common/Avatar'
 import styles from './finale.module.css'
@@ -13,10 +14,10 @@ import styles from './finale.module.css'
 /**
  * Vinnersekvens: resultatliste bygges nedenfra, vinnerlaget avsløres sist
  * med konfetti. Ved uavgjort feires alle vinnerlagene.
- * Verten kan gå tilbake for poengretting (GAME_SPEC §15).
+ * Verten kan åpne brettet igjen etter vinnersekvensen (GAME_SPEC §15).
  */
 export function FinaleScene() {
-  const { pack, actorRef, send } = useGame()
+  const { pack, actorRef, send, resetGame } = useGame()
   const teams = useSelector(actorRef, (s) => s.context.teams)
   const sceneRef = useRef<HTMLDivElement>(null)
   const confettiRef = useRef<HTMLDivElement>(null)
@@ -78,31 +79,48 @@ export function FinaleScene() {
 
       <h2 className={styles.finaleTitle}>{winningTeams.length > 1 ? 'UAVGJORT!' : 'VINNEREN ER'}</h2>
 
-      {winningTeams.map((team) => (
-        <div key={team.id} className={styles.winnerCard}>
-          <span className={styles.winnerLabel}>
-            {winningTeams.length > 1 ? 'Delt førsteplass' : 'Kveldens mestere'}
-          </span>
-          <span className={styles.winnerName}>{team.name}</span>
-          <span className={styles.winnerScore}>{team.score} poeng</span>
-          <div className={styles.winnerAvatars}>
-            {team.participantIds.map((pid) => {
-              const participant = getParticipant(pack, pid)
-              if (!participant) return null
-              return <Avatar key={pid} participant={participant} size={52} />
-            })}
+      <div className={styles.winnerGrid}>
+        {winningTeams.map((team) => (
+          <div
+            key={team.id}
+            className={styles.winnerCard}
+            style={teamColorStyle(teams.findIndex((candidate) => candidate.id === team.id))}
+          >
+            <span className={styles.winnerLabel}>
+              {winningTeams.length > 1 ? 'Delt førsteplass' : 'Kveldens mestere'}
+            </span>
+            <span className={styles.winnerName}>{team.name}</span>
+            <div className={styles.winnerAvatars}>
+              {team.participantIds.map((pid) => {
+                const participant = getParticipant(pack, pid)
+                if (!participant) return null
+                return <Avatar key={pid} participant={participant} size={108} />
+              })}
+            </div>
+            <span className={styles.winnerScore}>{team.score} poeng</span>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
       {runnersUp.length > 0 && (
         <div className={styles.resultList}>
           {runnersUp.map((team) => {
             const place = sorted.findIndex((t) => t.id === team.id) + 1
             return (
-              <div key={team.id} className={styles.resultRow}>
+              <div
+                key={team.id}
+                className={styles.resultRow}
+                style={teamColorStyle(teams.findIndex((candidate) => candidate.id === team.id))}
+              >
                 <span className={styles.resultPlace}>{place}.</span>
                 <span className={styles.resultName}>{team.name}</span>
+                <span className={styles.resultAvatars}>
+                  {team.participantIds.map((pid) => {
+                    const participant = getParticipant(pack, pid)
+                    if (!participant) return null
+                    return <Avatar key={pid} participant={participant} size={56} />
+                  })}
+                </span>
                 <span className={styles.resultScore}>{team.score}</span>
               </div>
             )
@@ -114,11 +132,19 @@ export function FinaleScene() {
         <button
           type="button"
           className="stageButton stageButton--ghost"
-          onClick={() => send({ type: 'BACK_TO_SUMMARY' })}
+          onClick={() => send({ type: 'BACK_TO_BOARD' })}
         >
-          Tilbake (poengretting)
+          Se brettet
         </button>
       </div>
+
+      <button
+        type="button"
+        className={`stageButton stageButton--ghost ${styles.endGameButton}`}
+        onClick={resetGame}
+      >
+        Avslutt spill
+      </button>
     </div>
   )
 }

@@ -1,3 +1,5 @@
+import type { ClueType } from '../content/schemas'
+
 export type Team = {
   id: string
   name: string
@@ -31,6 +33,7 @@ export type GameContext = {
   packVersion: string
   teamCount: number
   answerSeconds: number
+  answerSecondsByType: Record<ClueType, number>
   answerWindowSeconds: number
   teams: Team[]
   /** true når lagene kommer fra manualTeams i spillpakken. */

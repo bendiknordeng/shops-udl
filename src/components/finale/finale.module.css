@@ -65,10 +65,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(14px, 3vh, 30px);
-  overflow: hidden;
+  gap: clamp(16px, 2.6vh, 28px);
+  overflow-x: hidden;
+  overflow-y: auto;
   z-index: 50;
-  padding: 24px;
+  padding: clamp(24px, 4vh, 48px) 24px;
 }
 
 .finaleTitle {
@@ -80,90 +81,148 @@
   z-index: 2;
 }
 
+.winnerGrid {
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  width: min(1320px, calc(100vw - 48px));
+}
+
 .winnerCard {
   position: relative;
   z-index: 2;
-  background: linear-gradient(170deg, #3a1a63, #22093f);
-  border: 2px solid var(--gold);
+  background:
+    linear-gradient(155deg, rgb(var(--team-color-rgb) / 0.28), transparent 58%),
+    linear-gradient(170deg, #3a1a63, #22093f);
+  border: 2px solid var(--team-color);
   border-radius: var(--radius-l);
-  box-shadow: var(--shadow-pop), var(--glow-gold);
-  padding: clamp(18px, 3vh, 34px) clamp(26px, 5vw, 60px);
+  box-shadow: var(--shadow-pop), 0 0 30px rgb(var(--team-color-rgb) / 0.48);
+  width: min(940px, 100%);
+  min-width: 0;
+  max-width: 940px;
+  flex: 1 1 580px;
+  min-height: clamp(280px, 32vh, 380px);
+  padding: clamp(28px, 4vh, 48px) clamp(38px, 7vw, 92px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  animation: pulseGlow 2.4s ease-in-out infinite;
+  justify-content: center;
+  gap: 16px;
+  animation: teamWinnerPulse 2.4s ease-in-out infinite;
 }
 
 .winnerLabel {
-  font-size: 13px;
+  font-size: clamp(13px, 1.6vh, 17px);
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--team-color);
 }
 
 .winnerName {
   font-family: var(--font-display);
-  font-size: clamp(36px, 7vh, 72px);
+  font-size: clamp(42px, 7.5vh, 88px);
   letter-spacing: 0.06em;
-  color: var(--ink-warm);
+  color: var(--team-color);
   text-align: center;
   line-height: 1;
 }
 
 .winnerScore {
   font-family: var(--font-display);
-  font-size: clamp(22px, 3.4vh, 34px);
-  color: var(--gold);
+  font-size: clamp(26px, 3.8vh, 40px);
+  color: var(--team-color);
 }
 
 .winnerAvatars {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 6px;
+  gap: 16px;
+}
+
+.winnerAvatars > span {
+  width: clamp(76px, 9.5vh, 108px) !important;
+  height: clamp(76px, 9.5vh, 108px) !important;
+  border: 3px solid rgb(var(--team-color-rgb) / 0.72);
+  box-shadow: 0 0 24px rgb(var(--team-color-rgb) / 0.38);
 }
 
 .resultList {
   z-index: 2;
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: min(520px, 90vw);
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  width: min(1320px, calc(100vw - 48px));
 }
 
 .resultRow {
   display: flex;
+  flex: 1 1 520px;
   align-items: center;
-  gap: 14px;
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid var(--tile-edge);
+  gap: 20px;
+  background: linear-gradient(90deg, rgb(var(--team-color-rgb) / 0.16), rgba(0, 0, 0, 0.35));
+  border: 1px solid rgb(var(--team-color-rgb) / 0.48);
+  border-left-width: 5px;
   border-radius: var(--radius-m);
-  padding: 8px 16px;
+  width: min(640px, 100%);
+  max-width: 640px;
+  min-height: 92px;
+  padding: 15px 22px;
 }
 
 .resultPlace {
   font-family: var(--font-display);
-  font-size: 21px;
+  font-size: 25px;
   color: var(--ink-faint);
-  width: 34px;
+  width: 38px;
 }
 
 .resultName {
   flex: 1;
   font-family: var(--font-display);
-  font-size: 21px;
+  font-size: clamp(21px, 2.4vh, 27px);
   letter-spacing: 0.04em;
-  color: var(--ink);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: var(--team-color);
+  line-height: 1.05;
+}
+
+.resultAvatars {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 154px;
+}
+
+.resultAvatars > span {
+  width: clamp(42px, 5.4vh, 56px) !important;
+  height: clamp(42px, 5.4vh, 56px) !important;
+  margin-left: -10px;
+  border: 2px solid rgb(var(--team-color-rgb) / 0.62);
+  box-shadow: 0 0 12px rgb(var(--team-color-rgb) / 0.24);
+}
+
+.resultAvatars > span:first-child {
+  margin-left: 0;
 }
 
 .resultScore {
   font-family: var(--font-display);
-  font-size: 23px;
-  color: var(--gold);
+  font-size: clamp(24px, 2.8vh, 31px);
+  color: var(--team-color);
+}
+
+@keyframes teamWinnerPulse {
+  0%,
+  100% {
+    box-shadow: var(--shadow-pop), 0 0 24px rgb(var(--team-color-rgb) / 0.4);
+  }
+
+  50% {
+    box-shadow: var(--shadow-pop), 0 0 40px rgb(var(--team-color-rgb) / 0.7);
+  }
 }
 
 .confettiLayer {
@@ -177,4 +236,75 @@
   z-index: 2;
   display: flex;
   gap: 12px;
+}
+
+.endGameButton {
+  position: absolute;
+  right: clamp(16px, 2vw, 28px);
+  bottom: clamp(16px, 2vh, 24px);
+  z-index: 3;
+}
+
+@media (max-width: 900px) {
+  .finale {
+    justify-content: flex-start;
+    overflow-y: auto;
+  }
+
+  .winnerGrid {
+    flex-direction: column;
+  }
+
+  .resultList {
+    width: min(680px, calc(100vw - 32px));
+  }
+
+  .resultRow {
+    flex-basis: 100%;
+    max-width: none;
+  }
+
+  .winnerCard {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .resultRow {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .resultName {
+    min-width: calc(100% - 62px);
+  }
+
+  .resultAvatars {
+    flex: 1;
+    justify-content: flex-start;
+    padding-left: 50px;
+  }
+}
+
+@media (max-height: 760px) and (min-width: 901px) {
+  .finale {
+    justify-content: flex-start;
+    gap: 14px;
+    padding-block: 20px;
+  }
+
+  .winnerCard {
+    min-height: 230px;
+    padding-block: 22px;
+  }
+
+  .winnerAvatars > span {
+    width: 72px !important;
+    height: 72px !important;
+  }
+
+  .resultRow {
+    min-height: 76px;
+    padding-block: 10px;
+  }
 }
