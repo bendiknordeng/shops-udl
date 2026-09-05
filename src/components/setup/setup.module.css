@@ -205,6 +205,46 @@
   box-shadow: var(--glow-gold);
 }
 
+.poolAvatar {
+  position: relative;
+  display: inline-flex;
+  border-radius: 50%;
+}
+
+.poolItemExcluded {
+  color: rgba(255, 233, 194, 0.48);
+}
+
+.excludedMark {
+  position: absolute;
+  inset: -7px;
+  z-index: 2;
+  pointer-events: none;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.75));
+}
+
+.excludedMark::before,
+.excludedMark::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -4%;
+  width: 108%;
+  height: 15px;
+  border: 2px solid rgba(255, 220, 220, 0.72);
+  border-radius: 999px;
+  background: #e3182d;
+  box-shadow: 0 0 16px rgba(227, 24, 45, 0.72);
+}
+
+.excludedMark::before {
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.excludedMark::after {
+  transform: translateY(-50%) rotate(-45deg);
+}
+
 .teamsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));

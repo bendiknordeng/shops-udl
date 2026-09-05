@@ -2,7 +2,8 @@
   {
     "id": "anders-blesvik-gandrud",
     "name": "Gandrud",
-    "avatar": "/media/participants/anders-blesvik-gandrud.webp"
+    "avatar": "/media/participants/anders-blesvik-gandrud.webp",
+    "excludedFromTeams": true
   },
   {
     "id": "anders-strommen-danielsen",
@@ -27,22 +28,26 @@
   {
     "id": "christophe-braastad",
     "name": "Braastad",
-    "avatar": "/media/participants/christophe-braastad.webp"
+    "avatar": "/media/participants/christophe-braastad.webp",
+    "excludedFromTeams": true
   },
   {
     "id": "espen-val-walby",
     "name": "Walby",
-    "avatar": "/media/participants/espen-val-walby.webp"
+    "avatar": "/media/participants/espen-val-walby.webp",
+    "excludedFromTeams": true
   },
   {
     "id": "hakon-skirstad-grini",
     "name": "Grini",
-    "avatar": "/media/participants/hakon-skirstad-grini.webp"
+    "avatar": "/media/participants/hakon-skirstad-grini.webp",
+    "excludedFromTeams": true
   },
   {
     "id": "hauk",
     "name": "Hauk",
-    "avatar": "/media/participants/hauk.png"
+    "avatar": "/media/participants/hauk.png",
+    "excludedFromTeams": true
   },
   {
     "id": "jon-wilberg",
@@ -62,7 +67,8 @@
   {
     "id": "mathias-irgens",
     "name": "Irgens",
-    "avatar": "/media/participants/mathias-irgens.webp"
+    "avatar": "/media/participants/mathias-irgens.webp",
+    "excludedFromTeams": true
   },
   {
     "id": "peder-moyner-lund",
@@ -77,12 +83,14 @@
   {
     "id": "vegard-furu",
     "name": "Furu",
-    "avatar": "/media/participants/vegard-furu.webp"
+    "avatar": "/media/participants/vegard-furu.webp",
+    "excludedFromTeams": true
   },
   {
     "id": "vegard-kruger",
     "name": "Krüger",
-    "avatar": "/media/participants/vegard-kruger.webp"
+    "avatar": "/media/participants/vegard-kruger.webp",
+    "excludedFromTeams": true
   },
   {
     "id": "shops",

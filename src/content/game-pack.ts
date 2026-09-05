@@ -13,8 +13,9 @@ import type { GamePackInput } from './schemas'
  * MANUELLE LAG (valgfritt):
  * Default er tilfeldig trekning. Vil du sette lagene selv, fyll inn
  * `manualTeams` nedenfor — da brukes de i stedet for trekning, og
- * «Trekk lag på nytt» skjules. Alle 18 deltaker-IDer må fordeles nøyaktig
- * én gang. `name` er valgfritt; utelates det trekkes navn fra navnebanken.
+ * «Trekk lag på nytt» skjules. Alle deltakere som ikke har
+ * `excludedFromTeams` må fordeles nøyaktig én gang. `name` er valgfritt;
+ * utelates det trekkes navn fra navnebanken.
  *
  *   manualTeams: [
  *     { name: 'Lag 1', participantIds: ['shops', 'bendik-edvardsen', ...] },
@@ -28,7 +29,7 @@ export type GamePackDefinition = Omit<GamePackInput, 'participants' | 'teamNames
 
 export const gamePackDefinition: GamePackDefinition = {
   id: 'shops-udl-quiz',
-  version: '1.0.0',
+  version: '1.1.0',
   title: 'SHOPS UDL',
 
   allowedTeamCounts: [2, 3, 4, 5, 6],

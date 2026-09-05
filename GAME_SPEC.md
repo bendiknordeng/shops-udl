@@ -117,6 +117,7 @@ Hver deltaker har:
 - stabil ID;
 - visningsnavn;
 - avatarbilde;
+- valgfritt flagg som viser deltakeren med rødt kryss og utelater dem fra lag;
 - valgfri intern kommentar som aldri vises i spillet.
 
 Avatarbilder lagres som WebP i `public/media/participants/`. Hver deltakers
@@ -138,7 +139,7 @@ Kontrollen viser umiddelbart:
 
 Når verten fordeler lag:
 
-1. deltakerlisten stokkes med en uniform shuffle;
+1. deltakere uten ekskluderingsflagg stokkes med en uniform shuffle;
 2. deltakerne fordeles sekvensielt på lag;
 3. størrelsesforskjellen mellom største og minste lag blir maksimalt én;
 4. lagrekkefølgen blir også spillrekkefølgen;
@@ -177,7 +178,7 @@ Flyt:
 
 `Start spillet` er deaktivert frem til:
 
-- alle deltakere er fordelt én gang;
+- alle deltakere uten ekskluderingsflagg er fordelt én gang;
 - alle lag har navn;
 - alle avatarressurser er lastet eller har fallback;
 - spillpakken er valid;

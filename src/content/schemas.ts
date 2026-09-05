@@ -10,6 +10,7 @@ export const ParticipantSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
   avatar: z.string().min(1),
+  excludedFromTeams: z.boolean().default(false),
   // Intern kommentar — vises aldri i spillet.
   note: z.string().optional(),
 })
@@ -177,7 +178,8 @@ export const GamePackSchema = z
     if (pack.teamNames.length < maxTeams) {
       ctx.addIssue({ code: 'custom', message: 'Navnebanken har færre navn enn maksimalt antall lag' })
     }
-    if (maxTeams > pack.participants.length) {
+    const teamParticipants = pack.participants.filter((participant) => !participant.excludedFromTeams)
+    if (maxTeams > teamParticipants.length) {
       ctx.addIssue({ code: 'custom', message: 'Flere lag enn deltakere er ikke mulig' })
     }
     if (
@@ -188,6 +190,7 @@ export const GamePackSchema = z
     }
     if (pack.manualTeams) {
       const participantIds = new Set(pack.participants.map((p) => p.id))
+      const teamParticipantIds = new Set(teamParticipants.map((participant) => participant.id))
       const assigned = new Set<string>()
       for (const team of pack.manualTeams) {
         for (const pid of team.participantIds) {
@@ -197,10 +200,13 @@ export const GamePackSchema = z
           if (assigned.has(pid)) {
             ctx.addIssue({ code: 'custom', message: `manualTeams: «${pid}» er plassert på flere lag` })
           }
+          if (participantIds.has(pid) && !teamParticipantIds.has(pid)) {
+            ctx.addIssue({ code: 'custom', message: `manualTeams: «${pid}» er ekskludert fra lag` })
+          }
           assigned.add(pid)
         }
       }
-      for (const pid of participantIds) {
+      for (const pid of teamParticipantIds) {
         if (!assigned.has(pid)) {
           ctx.addIssue({ code: 'custom', message: `manualTeams: «${pid}» er ikke plassert på noe lag` })
         }

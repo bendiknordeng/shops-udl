@@ -49,9 +49,15 @@ export function createInitialContext(pack: GamePack): GameContext {
 export function canStartGame(pack: GamePack, context: GameContext): boolean {
   if (context.teams.length < 2) return false
   if (pack.clues.length === 0) return false
+  const teamParticipantIds = new Set(
+    pack.participants
+      .filter((participant) => !participant.excludedFromTeams)
+      .map((participant) => participant.id),
+  )
   const allocated = context.teams.flatMap((t) => t.participantIds)
-  if (allocated.length !== pack.participants.length) return false
+  if (allocated.length !== teamParticipantIds.size) return false
   if (new Set(allocated).size !== allocated.length) return false
+  if (allocated.some((participantId) => !teamParticipantIds.has(participantId))) return false
   const names = context.teams.map((t) => normalize(t.name))
   if (names.some((n) => n.length === 0)) return false
   if (new Set(names).size !== names.length) return false

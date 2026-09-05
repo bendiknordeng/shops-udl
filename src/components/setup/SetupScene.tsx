@@ -38,6 +38,10 @@ export function SetupScene() {
   const sceneRef = useRef<HTMLDivElement>(null)
   const teamsDrawn = context.teams.length > 0
   const manual = pack.manualTeams !== null
+  const teamParticipants = useMemo(
+    () => pack.participants.filter((participant) => !participant.excludedFromTeams),
+    [pack.participants],
+  )
   const answerWindowSeconds = context.answerWindowSeconds ?? DEFAULT_ANSWER_WINDOW_SECONDS
   const answerSecondsByType = context.answerSecondsByType ?? {
     image: context.answerSeconds,
@@ -147,14 +151,14 @@ export function SetupScene() {
   )
 
   const sizes = useMemo(
-    () => expectedTeamSizes(pack.participants.length, context.teamCount),
-    [pack.participants.length, context.teamCount],
+    () => expectedTeamSizes(teamParticipants.length, context.teamCount),
+    [teamParticipants.length, context.teamCount],
   )
   const uneven = new Set(sizes).size > 1
 
   function handleDraw() {
     setPresentationTeamIndex(null)
-    const teams = allocateRandomTeams(pack.participants, context.teamCount)
+    const teams = allocateRandomTeams(teamParticipants, context.teamCount)
     send({ type: 'DRAW_TEAMS', teams, manual: false })
     send({ type: 'DRAW_TEAM_NAMES', names: drawTeamNames(pack, teams) })
   }
@@ -288,11 +292,18 @@ export function SetupScene() {
             <button
               key={p.id}
               type="button"
-              className={styles.poolItem}
-              aria-label={`Vis stort bilde av ${p.name}`}
+              className={`${styles.poolItem} ${p.excludedFromTeams ? styles.poolItemExcluded : ''}`}
+              aria-label={
+                p.excludedFromTeams
+                  ? `Vis stort bilde av ${p.name} – ikke med i lagtrekningen`
+                  : `Vis stort bilde av ${p.name}`
+              }
               onClick={() => setSpotlightParticipantId(p.id)}
             >
-              <Avatar participant={p} size={160} />
+              <span className={styles.poolAvatar}>
+                <Avatar participant={p} size={160} />
+                {p.excludedFromTeams && <span className={styles.excludedMark} aria-hidden="true" />}
+              </span>
               <span>{p.name}</span>
             </button>
           ))}
