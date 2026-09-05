@@ -50,9 +50,9 @@ export const gamePackDefinition: GamePackDefinition = {
 
   categories: [
     { id: 'kategori-1', title: 'Shops at the Movies' },
-    { id: 'kategori-2', title: 'Hvor i all verden er Vandvik?' },
+    { id: 'kategori-2', title: 'Hvor i all verden er fattern' },
     { id: 'kategori-3', title: 'The Life of Shops' },
-    { id: 'kategori-4', title: 'Anders på flaska' },
+    { id: 'kategori-4', title: 'Pappa drikker mye' },
     { id: 'kategori-5', title: 'Voff Voff' },
   ],
 

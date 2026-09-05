@@ -2,7 +2,7 @@
 
 Oppgi svar med kategori og poeng, for eksempel: `Shops at the Movies 100: Titanic`.
 
-| Poeng | Shops at the Movies | Hvor i all verden er Vandvik? | The Life of Shops | Anders på flaska | Voff Voff |
+| Poeng | Shops at the Movies | Hvor i all verden er fattern | The Life of Shops | Pappa drikker mye | Voff Voff |
 | ---: | --- | --- | --- | --- | --- |
 | 100 | AI-bilde: **Wolf of Wall Street** | Sang: Men at Work – **Down Under** | Sang: Circle of Life, Løvenes konge → **Fødsel** | AI-sang: **Akevitt** | Sang: Knee Socks → **Ape** |
 | 200 | AI-sang: Breaking Free → **High School Musical** | AI-bilde: **Praha** | AI-bilde: Gullklokke → **Pensjonering** | AI-bilde: Fidel Castro → **Cuba Libre** | AI-sang: Karpe → **Fisk** |
