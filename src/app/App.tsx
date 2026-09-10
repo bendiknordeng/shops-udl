@@ -186,6 +186,21 @@ function GameShell() {
   const { actorRef } = useGame()
   const boardKeyboardSelection = useHotkeys()
   const remoteConnected = useHostRemoteServer()
+  const [isFullscreen, setIsFullscreen] = useState(Boolean(document.fullscreenElement))
+
+  useEffect(() => {
+    const syncFullscreenState = () => setIsFullscreen(Boolean(document.fullscreenElement))
+    document.addEventListener('fullscreenchange', syncFullscreenState)
+    return () => document.removeEventListener('fullscreenchange', syncFullscreenState)
+  }, [])
+
+  function toggleFullscreen() {
+    if (document.fullscreenElement) {
+      void document.exitFullscreen()
+      return
+    }
+    void document.documentElement.requestFullscreen()
+  }
 
   // Skjules hovedvinduet mens en gate-animasjon kjører, fullfør den — rAF
   // stopper i skjulte faner og ville ellers fryse spillflyten.
@@ -204,14 +219,23 @@ function GameShell() {
   if (inSetup) {
     return (
       <div className={styles.fullScene}>
-        <button
-          type="button"
-          className={`stageButton stageButton--ghost stageButton--small ${styles.hostWindowButton}`}
-          onClick={openHostWindow}
-          title="Åpne kontrollene i et eget, privat vindu"
-        >
-          ⧉ Kontrollvindu{remoteConnected ? ' ✓' : ''}
-        </button>
+        <div className={styles.setupActions}>
+          <button
+            type="button"
+            className="stageButton stageButton--ghost stageButton--small"
+            onClick={toggleFullscreen}
+          >
+            ⛶ {isFullscreen ? 'Avslutt fullskjerm' : 'Fullskjerm'}
+          </button>
+          <button
+            type="button"
+            className="stageButton stageButton--ghost stageButton--small"
+            onClick={openHostWindow}
+            title="Åpne kontrollene i et eget, privat vindu"
+          >
+            ⧉ Kontrollvindu{remoteConnected ? ' ✓' : ''}
+          </button>
+        </div>
         <SetupScene />
       </div>
     )
