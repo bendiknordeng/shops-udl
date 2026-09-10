@@ -30,7 +30,7 @@ export type GamePackDefinition = Omit<GamePackInput, 'participants' | 'teamNames
 export const gamePackDefinition: GamePackDefinition = {
   id: 'shops-udl-quiz',
   version: '1.1.0',
-  title: 'SHOPS UDL',
+  title: 'AI&D Young Dyrkes',
 
   allowedTeamCounts: [2, 3, 4, 5, 6],
   defaultAnswerSeconds: 30,
@@ -49,11 +49,11 @@ export const gamePackDefinition: GamePackDefinition = {
   manualTeams: null,
 
   categories: [
-    { id: 'kategori-1', title: 'Shops at the Movies' },
-    { id: 'kategori-2', title: 'Hvor i all verden er fattern' },
-    { id: 'kategori-3', title: 'The Life of Shops' },
-    { id: 'kategori-4', title: 'Pappa drikker mye' },
-    { id: 'kategori-5', title: 'Voff Voff' },
+    { id: 'kategori-1', title: 'Film' },
+    { id: 'kategori-2', title: 'Hvor i all verden?' },
+    { id: 'kategori-3', title: 'Livet' },
+    { id: 'kategori-4', title: 'Harto drikker mye' },
+    { id: 'kategori-5', title: 'Voff voff' },
   ],
 
   clues: [
@@ -274,6 +274,16 @@ export const gamePackDefinition: GamePackDefinition = {
       id: 'k5-200',
       categoryId: 'kategori-5',
       value: 200,
+      type: 'image',
+      answer: 'Løve',
+      acceptedAnswers: [],
+      bonusInfo: 'Stortinget og Løvebakken',
+      media: { kind: 'image', src: '/media/images/k5-400.png' },
+    },
+    {
+      id: 'k5-300',
+      categoryId: 'kategori-5',
+      value: 300,
       type: 'ai-song',
       answer: 'Fisk',
       acceptedAnswers: [],
@@ -281,24 +291,14 @@ export const gamePackDefinition: GamePackDefinition = {
       media: { kind: 'audio', src: '/media/audio/k5-200.mp3', fadeInMs: 400, fadeOutMs: 600 },
     },
     {
-      id: 'k5-300',
+      id: 'k5-400',
       categoryId: 'kategori-5',
-      value: 300,
+      value: 400,
       type: 'ai-song',
       answer: 'Ørn',
       acceptedAnswers: [],
       revealTitle: 'Eagles, Hotel California',
       media: { kind: 'audio', src: '/media/audio/k5-300.mp3', fadeInMs: 400, fadeOutMs: 600 },
-    },
-    {
-      id: 'k5-400',
-      categoryId: 'kategori-5',
-      value: 400,
-      type: 'image',
-      answer: 'Løve',
-      acceptedAnswers: [],
-      bonusInfo: 'Stortinget og Løvebakken',
-      media: { kind: 'image', src: '/media/images/k5-400.png' },
     },
     {
       id: 'k5-500',

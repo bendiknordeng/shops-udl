@@ -55,7 +55,7 @@ for (const clue of pack.clues) {
 }
 // Avatarer er valgfrie — appen har initial-fallback per deltaker.
 for (const participant of pack.participants) {
-  checkAsset(participant.avatar, `avatar ${participant.id}`, false)
+  if (participant.avatar) checkAsset(participant.avatar, `avatar ${participant.id}`, false)
 }
 
 if (missing.length > 0) {

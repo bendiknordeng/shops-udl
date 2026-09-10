@@ -29,6 +29,7 @@ type Props = {
 export function Avatar({ participant, size = 40, title }: Props) {
   const [failed, setFailed] = useState(false)
   const hue = hueFor(participant.id)
+  const showFallback = failed || !participant.avatar
   return (
     <span
       className={styles.avatar}
@@ -36,7 +37,7 @@ export function Avatar({ participant, size = 40, title }: Props) {
       title={title ?? participant.name}
       data-participant-id={participant.id}
     >
-      {failed ? (
+      {showFallback ? (
         <span
           className={styles.avatarFallback}
           style={{
@@ -67,6 +68,10 @@ export function preloadAvatars(pack: GamePack): Promise<void> {
   const loads = pack.participants.map(
     (p) =>
       new Promise<void>((resolve) => {
+        if (!p.avatar) {
+          resolve()
+          return
+        }
         const img = new Image()
         img.onload = () => resolve()
         img.onerror = () => resolve()

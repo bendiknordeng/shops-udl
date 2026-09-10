@@ -1,100 +1,54 @@
 [
   {
-    "id": "anders-blesvik-gandrud",
-    "name": "Gandrud",
-    "avatar": "/media/participants/anders-blesvik-gandrud.webp",
-    "excludedFromTeams": true
+    "id": "nora-a",
+    "name": "Nora A"
   },
   {
-    "id": "anders-strommen-danielsen",
-    "name": "Danielsen",
-    "avatar": "/media/participants/anders-strommen-danielsen.webp"
+    "id": "alexander",
+    "name": "Alexander"
   },
   {
-    "id": "andreas-bostrand",
-    "name": "Bøstrand",
-    "avatar": "/media/participants/andreas-bostrand.webp"
+    "id": "harto",
+    "name": "Harto"
   },
   {
-    "id": "bendik-edvardsen",
-    "name": "Kniksen",
-    "avatar": "/media/participants/bendik-edvardsen.webp"
+    "id": "hans",
+    "name": "Hans"
   },
   {
-    "id": "christian-lehre",
-    "name": "Lehre",
-    "avatar": "/media/participants/christian-lehre.webp"
+    "id": "karitas",
+    "name": "Karitas"
   },
   {
-    "id": "christophe-braastad",
-    "name": "Braastad",
-    "avatar": "/media/participants/christophe-braastad.webp",
-    "excludedFromTeams": true
+    "id": "magne",
+    "name": "Magne"
   },
   {
-    "id": "espen-val-walby",
-    "name": "Walby",
-    "avatar": "/media/participants/espen-val-walby.webp",
-    "excludedFromTeams": true
+    "id": "magnus",
+    "name": "Magnus"
   },
   {
-    "id": "hakon-skirstad-grini",
-    "name": "Grini",
-    "avatar": "/media/participants/hakon-skirstad-grini.webp",
-    "excludedFromTeams": true
+    "id": "mari",
+    "name": "Mari"
   },
   {
-    "id": "hauk",
-    "name": "Hauk",
-    "avatar": "/media/participants/hauk.png",
-    "excludedFromTeams": true
+    "id": "saeid",
+    "name": "Saeid"
   },
   {
-    "id": "jon-wilberg",
-    "name": "Jon Kanon",
-    "avatar": "/media/participants/jon-wilberg.webp"
+    "id": "sara",
+    "name": "Sara"
   },
   {
-    "id": "karl-petter-ulsrud",
-    "name": "KP",
-    "avatar": "/media/participants/karl-petter-ulsrud.webp"
+    "id": "simen",
+    "name": "Simen"
   },
   {
-    "id": "lasse-frigstad",
-    "name": "Lasse",
-    "avatar": "/media/participants/lasse-frigstad.webp"
+    "id": "sondre",
+    "name": "Sondre"
   },
   {
-    "id": "mathias-irgens",
-    "name": "Irgens",
-    "avatar": "/media/participants/mathias-irgens.webp",
-    "excludedFromTeams": true
-  },
-  {
-    "id": "peder-moyner-lund",
-    "name": "Peder",
-    "avatar": "/media/participants/peder-moyner-lund.webp"
-  },
-  {
-    "id": "sander-gronli-nordeide",
-    "name": "Sander",
-    "avatar": "/media/participants/sander-gronli-nordeide.webp"
-  },
-  {
-    "id": "vegard-furu",
-    "name": "Furu",
-    "avatar": "/media/participants/vegard-furu.webp",
-    "excludedFromTeams": true
-  },
-  {
-    "id": "vegard-kruger",
-    "name": "Krüger",
-    "avatar": "/media/participants/vegard-kruger.webp",
-    "excludedFromTeams": true
-  },
-  {
-    "id": "shops",
-    "name": "Shops",
-    "avatar": "/media/participants/shops.webp"
+    "id": "sverre",
+    "name": "Sverre"
   }
 ]

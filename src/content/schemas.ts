@@ -9,7 +9,8 @@ export type ClueType = (typeof CLUE_TYPES)[number]
 export const ParticipantSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
-  avatar: z.string().min(1),
+  // Valgfri avatar-URL. Uten bilde vises et deterministisk initial-merke.
+  avatar: z.string().min(1).optional(),
   excludedFromTeams: z.boolean().default(false),
   // Intern kommentar — vises aldri i spillet.
   note: z.string().optional(),
