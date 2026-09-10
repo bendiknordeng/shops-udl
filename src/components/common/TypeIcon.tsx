@@ -28,6 +28,15 @@ export function TypeIcon({ type, size = 18 }: Props) {
           <path d="M5 17.5l4.6-4.8 3.2 3.2 2.7-2.6 3.5 4.2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       )}
+      {type === 'ai-image' && (
+        // Bilderamme med gnist (AI-generert bilde)
+        <svg {...common}>
+          <rect x="3" y="4" width="18" height="16" rx="2.5" stroke="currentColor" strokeWidth="1.8" />
+          <circle cx="8.5" cy="9" r="1.6" fill="currentColor" />
+          <path d="M4.5 17.5l4-4.2 2.8 2.8 2-1.9 3.2 3.8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M19 3l.6 1.6 1.6.6-1.6.6-.6 1.6-.6-1.6-1.6-.6 1.6-.6.6-1.6z" fill="currentColor" />
+        </svg>
+      )}
       {type === 'ai-song' && (
         // Bølgeform + gnist
         <svg {...common}>
@@ -49,6 +58,7 @@ export function TypeIcon({ type, size = 18 }: Props) {
 
 export const TYPE_LABELS: Record<ClueType, string> = {
   image: 'Bilde',
+  'ai-image': 'AI-bilde',
   'ai-song': 'AI-sang',
   song: 'Sang',
 }
@@ -57,7 +67,7 @@ export const TYPE_LABELS: Record<ClueType, string> = {
 export function TypeLegend() {
   return (
     <div className={styles.legend} aria-label="Spørsmålstyper">
-      {(['image', 'ai-song', 'song'] as const).map((t) => (
+      {(['image', 'ai-image', 'ai-song', 'song'] as const).map((t) => (
         <span key={t} className={styles.legendItem}>
           <TypeIcon type={t} size={14} />
           {TYPE_LABELS[t]}

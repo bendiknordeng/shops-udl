@@ -26,6 +26,7 @@ export function createInitialContext(pack: GamePack): GameContext {
     answerSeconds: pack.defaultAnswerSeconds,
     answerSecondsByType: {
       image: pack.defaultAnswerSeconds,
+      'ai-image': pack.defaultAnswerSeconds,
       'ai-song': pack.defaultAnswerSeconds,
       song: pack.defaultAnswerSeconds,
     },
@@ -198,7 +199,7 @@ export function createGameMachine(pack: GamePack) {
           )
           return {
             answerSeconds: seconds,
-            answerSecondsByType: { image: seconds, 'ai-song': seconds, song: seconds },
+            answerSecondsByType: { image: seconds, 'ai-image': seconds, 'ai-song': seconds, song: seconds },
           }
         }),
       },
@@ -210,6 +211,7 @@ export function createGameMachine(pack: GamePack) {
           )
           const current = context.answerSecondsByType ?? {
             image: context.answerSeconds,
+            'ai-image': context.answerSeconds,
             'ai-song': context.answerSeconds,
             song: context.answerSeconds,
           }

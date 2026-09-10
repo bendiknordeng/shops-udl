@@ -63,7 +63,7 @@ export function RemoteHostWindow({ pack }: { pack: GamePack }) {
   const [boardSelection, setBoardSelection] = useState<BoardKeyboardSelection | null>(null)
 
   useEffect(() => {
-    document.title = 'SHOPS UDL — Kontroller'
+    document.title = 'AI&D Young Dyrkes — Kontroller'
     if (typeof BroadcastChannel === 'undefined') return
     const channel = new BroadcastChannel(HOST_CHANNEL)
     channelRef.current = channel

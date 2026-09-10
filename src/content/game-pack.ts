@@ -216,9 +216,9 @@ export const gamePackDefinition: GamePackDefinition = {
       categoryId: 'kategori-4',
       value: 100,
       type: 'ai-song',
-      answer: 'Akevitt',
+      answer: 'Øl',
       acceptedAnswers: [],
-      media: { kind: 'audio', src: '/media/audio/k4-100.mp3', fadeInMs: 400, fadeOutMs: 600 },
+      media: { kind: 'audio', src: '/media/audio/k4-500.mp3', fadeInMs: 400, fadeOutMs: 600 },
     },
     {
       id: 'k4-200',
@@ -253,10 +253,10 @@ export const gamePackDefinition: GamePackDefinition = {
       id: 'k4-500',
       categoryId: 'kategori-4',
       value: 500,
-      type: 'ai-song',
-      answer: 'Øl',
+      type: 'ai-image',
+      answer: 'Bloody Mary',
       acceptedAnswers: [],
-      media: { kind: 'audio', src: '/media/audio/k4-500.mp3', fadeInMs: 400, fadeOutMs: 600 },
+      media: { kind: 'image', src: '/media/images/k4-500.png' },
     },
 
     // ── Kategori 5 ─────────────────────────────────────────────

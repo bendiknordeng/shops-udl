@@ -3,7 +3,7 @@ import { z } from 'zod'
 export const CLUE_VALUES = [100, 200, 300, 400, 500] as const
 export type ClueValue = (typeof CLUE_VALUES)[number]
 
-export const CLUE_TYPES = ['image', 'ai-song', 'song'] as const
+export const CLUE_TYPES = ['image', 'ai-image', 'ai-song', 'song'] as const
 export type ClueType = (typeof CLUE_TYPES)[number]
 
 export const ParticipantSchema = z.object({
@@ -93,7 +93,7 @@ export const ClueSchema = z
     media: ClueMediaSchema,
   })
   .superRefine((clue, ctx) => {
-    const expected = clue.type === 'image' ? 'image' : 'audio'
+    const expected = clue.type === 'image' || clue.type === 'ai-image' ? 'image' : 'audio'
     if (clue.media.kind !== expected) {
       ctx.addIssue({
         code: 'custom',

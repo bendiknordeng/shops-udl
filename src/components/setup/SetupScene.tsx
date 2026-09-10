@@ -23,6 +23,7 @@ import styles from './setup.module.css'
 
 const QUESTION_TYPE_TIME_CONTROLS = [
   { type: 'image', label: 'Bilde' },
+  { type: 'ai-image', label: 'AI-bilde' },
   { type: 'ai-song', label: 'AI-sang' },
   { type: 'song', label: 'Sang' },
 ] as const
@@ -45,6 +46,7 @@ export function SetupScene() {
   const answerWindowSeconds = context.answerWindowSeconds ?? DEFAULT_ANSWER_WINDOW_SECONDS
   const answerSecondsByType = context.answerSecondsByType ?? {
     image: context.answerSeconds,
+    'ai-image': context.answerSeconds,
     'ai-song': context.answerSeconds,
     song: context.answerSeconds,
   }
@@ -197,7 +199,7 @@ export function SetupScene() {
   return (
     <div ref={sceneRef} className={styles.scene}>
       <h1 className={styles.title} data-anim="title">
-        SHOPS <span className={styles.titleAccent}>UDL</span>
+        AI&D Young <span className={styles.titleAccent}>Dyrkes</span>
       </h1>
 
       <div className={styles.controlsRow} data-anim="controls">

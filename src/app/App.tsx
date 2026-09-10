@@ -100,7 +100,7 @@ function MainApp() {
     return (
       <div className={styles.bootScreen}>
         <div className={styles.bootLogo}>
-          SHOPS <span>UDL</span>
+          AI&D Young <span>Dyrkes</span>
         </div>
         <span className={styles.bootHint}>Rigger scenen …</span>
       </div>
@@ -111,7 +111,7 @@ function MainApp() {
     return (
       <div className={styles.bootScreen}>
         <div className={styles.bootLogo}>
-          SHOPS <span>UDL</span>
+          AI&D Young <span>Dyrkes</span>
         </div>
         <span className={styles.bootHint}>Spillpakken er ugyldig — rett feilene og bygg på nytt:</span>
         <ul className={styles.errorList}>
