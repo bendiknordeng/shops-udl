@@ -32,7 +32,8 @@
   {
     "id": "magne",
     "name": "Magne",
-    "avatar": "/media/participants/magne.jpg"
+    "avatar": "/media/participants/magne.jpg",
+    "excludedFromTeams": true
   },
   {
     "id": "magnus",
