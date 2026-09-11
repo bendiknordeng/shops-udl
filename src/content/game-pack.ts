@@ -121,10 +121,10 @@ export const gamePackDefinition: GamePackDefinition = {
       id: 'k2-200',
       categoryId: 'kategori-2',
       value: 200,
-      type: 'image',
-      answer: 'Praha',
+      type: 'ai-image',
+      answer: 'Las Vegas',
       acceptedAnswers: [],
-      media: { kind: 'image', src: '/media/images/k2-200.png' },
+      media: { kind: 'image', src: '/media/images/k2-200.jpeg' },
     },
     {
       id: 'k2-300',
