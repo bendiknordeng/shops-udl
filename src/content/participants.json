@@ -1,54 +1,67 @@
 [
   {
     "id": "nora-a",
-    "name": "Nora A"
+    "name": "Nora A",
+    "avatar": "/media/participants/nora-a.jpg"
   },
   {
     "id": "alexander",
-    "name": "Alexander"
+    "name": "Alexander",
+    "avatar": "/media/participants/alexander.jpg"
   },
   {
     "id": "harto",
-    "name": "Harto"
+    "name": "Harto",
+    "avatar": "/media/participants/harto.jpg"
   },
   {
     "id": "hans",
-    "name": "Hans"
+    "name": "Hans",
+    "avatar": "/media/participants/hans.jpg"
   },
   {
     "id": "karitas",
-    "name": "Karitas"
+    "name": "Karitas",
+    "avatar": "/media/participants/karitas.jpg"
   },
   {
     "id": "magne",
-    "name": "Magne"
+    "name": "Magne",
+    "avatar": "/media/participants/magne.jpg"
   },
   {
     "id": "magnus",
-    "name": "Magnus"
+    "name": "Magnus",
+    "avatar": "/media/participants/magnus.jpg"
   },
   {
     "id": "mari",
-    "name": "Mari"
+    "name": "Mari",
+    "avatar": "/media/participants/mari.jpg"
   },
   {
     "id": "saeid",
-    "name": "Saeid"
+    "name": "Saeid",
+    "avatar": "/media/participants/saeid.jpg"
   },
   {
     "id": "sara",
-    "name": "Sara"
+    "name": "Sara",
+    "avatar": "/media/participants/sara.jpg"
   },
   {
     "id": "simen",
-    "name": "Simen"
+    "name": "Simen",
+    "avatar": "/media/participants/simen.jpg"
   },
   {
     "id": "sondre",
-    "name": "Sondre"
+    "name": "Sondre",
+    "avatar": "/media/participants/sondre.jpg"
   },
   {
     "id": "sverre",
-    "name": "Sverre"
+    "name": "Sverre",
+    "avatar": "/media/participants/sverre.jpg"
   }
 ]
