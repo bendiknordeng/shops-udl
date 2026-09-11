@@ -52,7 +52,8 @@
   {
     "id": "simen",
     "name": "Simen",
-    "avatar": "/media/participants/simen.jpg"
+    "avatar": "/media/participants/simen.jpg",
+    "excludedFromTeams": true
   },
   {
     "id": "sondre",
