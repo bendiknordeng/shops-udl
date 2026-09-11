@@ -206,7 +206,7 @@ export const gamePackDefinition: GamePackDefinition = {
       answer: 'Ungdomstid',
       acceptedAnswers: ['Pubertet', 'Konfirmasjon'],
       revealTitle: 'Til ungdommen',
-      media: { kind: 'audio', src: '/media/audio/k3-500.mp3', fadeInMs: 400, fadeOutMs: 600 },
+      media: { kind: 'audio', src: '/media/audio/k3-500.wav', fadeInMs: 400, fadeOutMs: 600 },
     },
 
     // ── Kategori 4 ─────────────────────────────────────────────
