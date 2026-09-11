@@ -47,7 +47,8 @@
   {
     "id": "saeid",
     "name": "Saeid",
-    "avatar": "/media/participants/saeid.jpg"
+    "avatar": "/media/participants/saeid.jpg",
+    "excludedFromTeams": true
   },
   {
     "id": "sara",
