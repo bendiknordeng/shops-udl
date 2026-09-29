@@ -225,10 +225,10 @@ export const gamePackDefinition: GamePackDefinition = {
       categoryId: 'kategori-4',
       value: 300,
       type: 'song',
-      answer: 'Nike',
+      answer: 'Versace',
       acceptedAnswers: [],
-      revealTitle: 'Nikes',
-      revealArtist: 'Frank Ocean',
+      revealTitle: 'Versace on the Floor',
+      revealArtist: 'Bruno Mars',
       media: { kind: 'audio', src: '/media/audio/k4-300.mp3', fadeInMs: 300, fadeOutMs: 600 },
     },
     {
