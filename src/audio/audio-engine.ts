@@ -41,7 +41,6 @@ class AudioEngine {
   private state: AudioEngineState = { status: 'idle', clueId: null, error: null }
   private listeners = new Set<Listener>()
   private watchInterval: number | null = null
-  private analyser: AnalyserNode | null = null
   private loadGeneration = 0
   private retryTimeout: number | null = null
   private clipEndTimeout: number | null = null
@@ -118,12 +117,12 @@ class AudioEngine {
     this.howl = new Howl({
       src: [media.src],
       preload: true,
-      html5: false,
+      html5: true,
       volume: this.effectiveVolume(),
       onload: () => {
         if (this.loadGeneration !== generation) return
-        const resume = this.readStoredPosition(clueId)
-        this.howl?.seek(resume ?? media.startAtSeconds)
+        // Alltid start på konfigurert startpunkt (aldri gjenoppta midt i).
+        this.howl?.seek(media.startAtSeconds)
         this.setState({ status: 'ready' })
       },
       onloaderror: (_id, err) => {
@@ -247,22 +246,17 @@ class AudioEngine {
     this.setState({ status: 'idle', clueId: null, error: null })
   }
 
-  /** Analyser-tap for dekorativ lydvisualisering. */
+  /**
+   * Analyser for dekorativ lydvisualisering.
+   *
+   * Med html5:true spilles lyden gjennom et <audio>-element utenom Web
+   * Audio-grafen, så vi kan IKKE lese sanntids-frekvensdata uten å re-rute
+   * elementet — og re-ruting gjør lyden stum når konteksten er suspendert.
+   * Vi returnerer derfor null, og visualiseringen bruker en levende
+   * animasjon i stedet. Lyd-avspilling røres aldri.
+   */
   getAnalyser(): AnalyserNode | null {
-    try {
-      const ctx: AudioContext | undefined = Howler.ctx
-      const masterGain: GainNode | undefined = Howler.masterGain
-      if (!ctx || !masterGain) return null
-      if (!this.analyser) {
-        this.analyser = ctx.createAnalyser()
-        this.analyser.fftSize = 128
-        this.analyser.smoothingTimeConstant = 0.82
-        masterGain.connect(this.analyser)
-      }
-      return this.analyser
-    } catch {
-      return null
-    }
+    return null
   }
 
   private startWatcher() {
@@ -325,17 +319,6 @@ class AudioEngine {
     }
   }
 
-  private readStoredPosition(clueId: string): number | null {
-    try {
-      const raw = sessionStorage.getItem(POSITION_KEY_PREFIX + clueId)
-      if (raw === null) return null
-      const value = Number(raw)
-      return Number.isFinite(value) ? value : null
-    } catch {
-      return null
-    }
-  }
-
   private clearStoredPosition() {
     if (!this.clueId) return
     try {
@@ -347,3 +330,25 @@ class AudioEngine {
 }
 
 export const audioEngine = new AudioEngine()
+
+// Dev-only feilsøkingskrok: les lydtilstand fra konsollen.
+if (import.meta.env?.DEV && typeof window !== 'undefined') {
+  ;(window as unknown as Record<string, unknown>).__audio = {
+    engine: audioEngine,
+    debug() {
+      const info = {
+        state: audioEngine.getState(),
+        ctxState: Howler.ctx?.state ?? null,
+        globalVolume: Howler.volume(),
+        masterGain: Howler.masterGain?.gain?.value ?? null,
+        howlerMuted: (Howler as unknown as { _muted?: boolean })._muted ?? null,
+      }
+      // eslint-disable-next-line no-console
+      console.log('[__audio]', info)
+      return info
+    },
+    resume() {
+      return Howler.ctx?.resume()
+    },
+  }
+}

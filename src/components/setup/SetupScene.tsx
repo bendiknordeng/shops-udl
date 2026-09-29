@@ -26,6 +26,7 @@ const QUESTION_TYPE_TIME_CONTROLS = [
   { type: 'ai-image', label: 'AI-bilde' },
   { type: 'ai-song', label: 'AI-sang' },
   { type: 'song', label: 'Sang' },
+  { type: 'text', label: 'Tekst' },
 ] as const
 
 export function SetupScene() {
@@ -49,6 +50,7 @@ export function SetupScene() {
     'ai-image': context.answerSeconds,
     'ai-song': context.answerSeconds,
     song: context.answerSeconds,
+    text: context.answerSeconds,
   }
   const spotlightParticipant =
     spotlightParticipantId == null ? null : getParticipant(pack, spotlightParticipantId)

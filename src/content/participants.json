@@ -1,75 +1,37 @@
 [
   {
-    "id": "nora-a",
-    "name": "Nora A",
-    "avatar": "/media/participants/nora-a.jpg"
-  },
-  {
-    "id": "nora-u",
-    "name": "Nora U",
-    "avatar": "/media/participants/nora-u.jpg"
-  },
-  {
-    "id": "alexander",
-    "name": "Alexander",
-    "avatar": "/media/participants/alexander.jpg"
-  },
-  {
-    "id": "harto",
-    "name": "Harto",
-    "avatar": "/media/participants/harto.jpg"
-  },
-  {
-    "id": "hans",
-    "name": "Hans",
-    "avatar": "/media/participants/hans.jpg"
-  },
-  {
-    "id": "karitas",
-    "name": "Karitas",
-    "avatar": "/media/participants/karitas.jpg"
-  },
-  {
-    "id": "magne",
-    "name": "Magne",
-    "avatar": "/media/participants/magne.jpg",
-    "excludedFromTeams": true
-  },
-  {
-    "id": "magnus",
-    "name": "Magnus",
-    "avatar": "/media/participants/magnus.jpg"
-  },
-  {
-    "id": "mari",
-    "name": "Mari",
-    "avatar": "/media/participants/mari.jpg"
-  },
-  {
-    "id": "saeid",
-    "name": "Saeid",
-    "avatar": "/media/participants/saeid.jpg",
-    "excludedFromTeams": true
-  },
-  {
-    "id": "sara",
-    "name": "Sara",
-    "avatar": "/media/participants/sara.jpg"
-  },
-  {
-    "id": "simen",
-    "name": "Simen",
-    "avatar": "/media/participants/simen.jpg",
-    "excludedFromTeams": true
+    "id": "bendik",
+    "name": "Bendik",
+    "avatar": "/media/participants/bendik.png"
   },
   {
     "id": "sondre",
     "name": "Sondre",
-    "avatar": "/media/participants/sondre.jpg"
+    "avatar": "/media/participants/sondre.png"
   },
   {
-    "id": "sverre",
-    "name": "Sverre",
-    "avatar": "/media/participants/sverre.jpg"
+    "id": "magnus",
+    "name": "Magnus",
+    "avatar": "/media/participants/magnus.png"
+  },
+  {
+    "id": "selene",
+    "name": "Selene",
+    "avatar": "/media/participants/selene.png"
+  },
+  {
+    "id": "ole",
+    "name": "Ole",
+    "avatar": "/media/participants/ole.png"
+  },
+  {
+    "id": "ada",
+    "name": "Ada",
+    "avatar": "/media/participants/ada.png"
+  },
+  {
+    "id": "mathilde",
+    "name": "Mathilde",
+    "avatar": "/media/participants/mathilde.png"
   }
 ]

@@ -52,6 +52,13 @@ export function TypeIcon({ type, size = 18 }: Props) {
           <circle cx="12" cy="12" r="1" fill="currentColor" />
         </svg>
       )}
+      {type === 'text' && (
+        // Tekst/gåte — «Aa» i ramme
+        <svg {...common}>
+          <rect x="3" y="4" width="18" height="16" rx="2.5" stroke="currentColor" strokeWidth="1.8" />
+          <path d="M7 16l2.2-6 2.2 6M7.7 14h3M14 16v-3.4a1.6 1.6 0 0 1 3.2 0V16M14 13.6h3.2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )}
     </span>
   )
 }
@@ -61,13 +68,14 @@ export const TYPE_LABELS: Record<ClueType, string> = {
   'ai-image': 'AI-bilde',
   'ai-song': 'AI-sang',
   song: 'Sang',
+  text: 'Tekst',
 }
 
 /** Kompakt tegnforklaring for brettet. */
 export function TypeLegend() {
   return (
     <div className={styles.legend} aria-label="Spørsmålstyper">
-      {(['image', 'ai-image', 'ai-song', 'song'] as const).map((t) => (
+      {(['image', 'ai-image', 'ai-song', 'song', 'text'] as const).map((t) => (
         <span key={t} className={styles.legendItem}>
           <TypeIcon type={t} size={14} />
           {TYPE_LABELS[t]}

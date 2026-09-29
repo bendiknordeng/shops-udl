@@ -29,6 +29,7 @@ export function createInitialContext(pack: GamePack): GameContext {
       'ai-image': pack.defaultAnswerSeconds,
       'ai-song': pack.defaultAnswerSeconds,
       song: pack.defaultAnswerSeconds,
+      text: pack.defaultAnswerSeconds,
     },
     answerWindowSeconds: DEFAULT_ANSWER_WINDOW_SECONDS,
     teams: [],
@@ -160,11 +161,8 @@ export function createGameMachine(pack: GamePack) {
       }),
       beginCountdown: assign({
         timer: ({ context }) => {
-          const clue = findClue(pack, context.activeClueId)
-          const seconds = clue
-            ? (context.answerSecondsByType?.[clue.type] ?? context.answerSeconds)
-            : context.answerSeconds
-          return startTimer(seconds)
+          // Alltid den bestemte svartiden (default 30 s) — uavhengig av type.
+          return startTimer(context.answerSeconds)
         },
         answerWindowTimer: idleTimer,
         mediaError: null,
@@ -199,7 +197,7 @@ export function createGameMachine(pack: GamePack) {
           )
           return {
             answerSeconds: seconds,
-            answerSecondsByType: { image: seconds, 'ai-image': seconds, 'ai-song': seconds, song: seconds },
+            answerSecondsByType: { image: seconds, 'ai-image': seconds, 'ai-song': seconds, song: seconds, text: seconds },
           }
         }),
       },

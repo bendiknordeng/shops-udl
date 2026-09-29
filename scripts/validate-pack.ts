@@ -51,7 +51,8 @@ function checkAsset(publicPath: string, label: string, required: boolean) {
 }
 
 for (const clue of pack.clues) {
-  checkAsset(clue.media.src, `rute ${clue.id}`, true)
+  // Tekstgåter har ingen mediefil å sjekke.
+  if (clue.media.kind !== 'text') checkAsset(clue.media.src, `rute ${clue.id}`, true)
 }
 // Avatarer er valgfrie — appen har initial-fallback per deltaker.
 for (const participant of pack.participants) {

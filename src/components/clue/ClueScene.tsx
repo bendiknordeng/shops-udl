@@ -90,6 +90,11 @@ export function ClueScene() {
     if (!clue) return
     setMediaReady(false)
     audioStartedRef.current = false
+    if (clue.media.kind === 'text') {
+      // Tekstgåter har ingen media å laste — klar med en gang.
+      setMediaReady(true)
+      return undefined
+    }
     if (clue.media.kind === 'image') {
       let cancelled = false
       const img = new Image()
@@ -369,6 +374,12 @@ export function ClueScene() {
           src={imageFallback ? '/media/images/placeholder-clue.svg' : clue.media.src}
           hidden={context.mediaHidden}
         />
+      </div>
+    )
+  } else if (clue.media.kind === 'text') {
+    mediaContent = (
+      <div className={styles.textStage}>
+        <p className={styles.textPuzzle}>{clue.media.prompt}</p>
       </div>
     )
   }

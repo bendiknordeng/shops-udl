@@ -162,6 +162,13 @@ export function BoardScene({ keyboardSelection }: { keyboardSelection: BoardKeyb
                         </span>
                       </span>
                     )}
+                    {clue.media.kind === 'text' && (
+                      <span className={styles.usedClueAudio} aria-hidden="true">
+                        <span className={styles.usedClueDisc}>
+                          <TypeIcon type={clue.type} size={28} />
+                        </span>
+                      </span>
+                    )}
                     <span className={styles.usedClueShade} />
                     <span className={styles.usedClueValue}>{value}</span>
                     {awardedTeam && (

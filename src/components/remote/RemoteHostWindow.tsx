@@ -367,6 +367,9 @@ export function RemoteHostWindow({ pack }: { pack: GamePack }) {
             </span>
             <div className={styles.answerBox}>
               <span className={styles.answerLabel}>Fasit — kun synlig her</span>
+              {clue.media.kind === 'text' && (
+                <span className={styles.answerMeta}>Gåte på skjermen: {clue.media.prompt}</span>
+              )}
               <span className={styles.answerText}>{clue.answer}</span>
               {clue.acceptedAnswers.length > 0 && (
                 <span className={styles.answerMeta}>Godtas også: {clue.acceptedAnswers.join(', ')}</span>

@@ -3,7 +3,7 @@ import { z } from 'zod'
 export const CLUE_VALUES = [100, 200, 300, 400, 500] as const
 export type ClueValue = (typeof CLUE_VALUES)[number]
 
-export const CLUE_TYPES = ['image', 'ai-image', 'ai-song', 'song'] as const
+export const CLUE_TYPES = ['image', 'ai-image', 'ai-song', 'song', 'text'] as const
 export type ClueType = (typeof CLUE_TYPES)[number]
 
 export const ParticipantSchema = z.object({
@@ -72,7 +72,18 @@ export const AudioMediaSchema = z.object({
 })
 export type AudioMedia = z.infer<typeof AudioMediaSchema>
 
-export const ClueMediaSchema = z.discriminatedUnion('kind', [ImageMediaSchema, AudioMediaSchema])
+export const TextMediaSchema = z.object({
+  kind: z.literal('text'),
+  // Selve gåte-/spørsmålsteksten som vises på storskjermen.
+  prompt: z.string().min(1),
+})
+export type TextMedia = z.infer<typeof TextMediaSchema>
+
+export const ClueMediaSchema = z.discriminatedUnion('kind', [
+  ImageMediaSchema,
+  AudioMediaSchema,
+  TextMediaSchema,
+])
 export type ClueMedia = z.infer<typeof ClueMediaSchema>
 
 export const ClueSchema = z
@@ -93,7 +104,12 @@ export const ClueSchema = z
     media: ClueMediaSchema,
   })
   .superRefine((clue, ctx) => {
-    const expected = clue.type === 'image' || clue.type === 'ai-image' ? 'image' : 'audio'
+    const expected =
+      clue.type === 'text'
+        ? 'text'
+        : clue.type === 'image' || clue.type === 'ai-image'
+          ? 'image'
+          : 'audio'
     if (clue.media.kind !== expected) {
       ctx.addIssue({
         code: 'custom',
