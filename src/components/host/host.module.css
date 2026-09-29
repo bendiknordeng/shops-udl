@@ -122,8 +122,8 @@
 }
 
 .hostButtonDanger {
-  background: rgba(255, 61, 129, 0.15);
-  border-color: rgba(255, 61, 129, 0.4);
+  background: rgba(205, 33, 42, 0.15);
+  border-color: rgba(205, 33, 42, 0.4);
   color: var(--pink);
 }
 

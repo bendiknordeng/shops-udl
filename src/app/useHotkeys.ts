@@ -7,6 +7,7 @@ import { boardColumns, getClue, sortedByScore } from '../game/selectors'
 
 const AWARD_CONFIRM_WINDOW_MS = 1500
 const REVEAL_CONFIRM_WINDOW_MS = 1500
+const BACK_CONFIRM_WINDOW_MS = 1500
 
 type PendingAwardShortcut = {
   key: string
@@ -33,6 +34,7 @@ export function useHotkeys() {
   const snapshot = useSelector(actorRef, (s) => s)
   const pendingAwardRef = useRef<PendingAwardShortcut | null>(null)
   const pendingRevealRef = useRef<PendingRevealShortcut | null>(null)
+  const pendingBackRef = useRef<number | null>(null)
   const [boardMode, setBoardMode] = useState<BoardKeyboardSelection['mode']>('column')
   const [boardSelection, setBoardSelection] = useState<BoardKeyboardSelection | null>(null)
 
@@ -127,6 +129,29 @@ export function useHotkeys() {
           team = sortedByScore(snapshot.context.teams)[Number(e.key) - 1] ?? null
         }
         if (team) send({ type: 'AWARD_CLUE', teamId: team.id })
+        return
+      }
+
+      // I ×2: ingen får poeng (samme bekreftelses­vindu som poengtildeling).
+      if (canAward && (e.key === 'i' || e.key === 'I')) {
+        if (e.metaKey || e.ctrlKey || e.altKey) return
+        e.preventDefault()
+        if (e.repeat || !clue) return
+
+        const now = Date.now()
+        const pending = pendingAwardRef.current
+        const confirmed =
+          pending?.key === 'i' &&
+          pending.clueId === clue.id &&
+          now - pending.pressedAt <= AWARD_CONFIRM_WINDOW_MS
+
+        if (!confirmed) {
+          pendingAwardRef.current = { key: 'i', clueId: clue.id, pressedAt: now }
+          return
+        }
+
+        pendingAwardRef.current = null
+        send({ type: 'NO_CORRECT_ANSWER' })
         return
       }
       pendingAwardRef.current = null
@@ -261,7 +286,20 @@ export function useHotkeys() {
           break
         case 'b':
         case 'B':
-          if (snapshot.matches({ clue: 'decided' })) send({ type: 'RETURN_TO_BOARD' })
+          if (snapshot.matches({ clue: 'decided' })) {
+            e.preventDefault()
+            if (e.repeat) break
+            // Krev dobbelttrykk for å gå tilbake til brettet.
+            const now = Date.now()
+            const pending = pendingBackRef.current
+            if (pending !== null && now - pending <= BACK_CONFIRM_WINDOW_MS) {
+              pendingBackRef.current = null
+              send({ type: 'RETURN_TO_BOARD' })
+            } else {
+              pendingBackRef.current = now
+            }
+            break
+          }
           if (snapshot.matches({ clue: 'review' })) send({ type: 'CLOSE_CLUE_REVIEW' })
           break
         case 'r':
@@ -302,6 +340,7 @@ export const HOTKEY_HELP: { key: string; label: string }[] = [
   { key: 'X', label: 'Fjern markering / avbryt aktiv rute' },
   { key: '1–9 ×2', label: 'Gi riktig til laget på valgt plassering' },
   { key: '0 ×2', label: 'Gi riktig til laget med tur' },
+  { key: 'I ×2', label: 'Ingen får poeng' },
   { key: 'Mellomrom', label: 'Spill av / pause lyd' },
   { key: 'S', label: 'Start sang og nedtelling på nytt' },
   { key: 'P', label: 'Start bare sangen på nytt' },
@@ -312,7 +351,7 @@ export const HOTKEY_HELP: { key: string; label: string }[] = [
   { key: 'O', label: 'Gå til åpen svarfase' },
   { key: 'F ×2 / F', label: 'Vis / skjul fasit i aktivt spørsmål' },
   { key: 'M', label: 'Skjul / vis bilde' },
-  { key: 'B', label: 'Tilbake til brettet' },
+  { key: 'B ×2', label: 'Tilbake til brettet (etter avgjørelse)' },
   { key: 'R', label: 'Trekk tilbake poeng på aktivt spørsmål' },
   { key: 'U', label: 'Angre siste poenghandling' },
 ]

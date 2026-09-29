@@ -32,7 +32,7 @@ export const gamePackDefinition: GamePackDefinition = {
   version: '1.1.0',
   title: 'Italiensk aften',
 
-  allowedTeamCounts: [2, 3, 4, 5, 6],
+  allowedTeamCounts: [2, 3, 4],
   defaultAnswerSeconds: 30,
   presentation: {
     minAnswerSeconds: 10,
@@ -50,9 +50,9 @@ export const gamePackDefinition: GamePackDefinition = {
 
   categories: [
     { id: 'kategori-1', title: 'Hvilken låt?' },
-    { id: 'kategori-2', title: 'Who´s my daddy?' },
+    { id: 'kategori-2', title: "Who's my daddy?" },
     { id: 'kategori-3', title: 'Tall og bokstaver' },
-    { id: 'kategori-4', title: 'Merkevare' },
+    { id: 'kategori-4', title: 'Brandy og Herr Visvas' },
     { id: 'kategori-5', title: 'mjau' },
   ],
 
@@ -206,6 +206,7 @@ export const gamePackDefinition: GamePackDefinition = {
       type: 'ai-song',
       answer: 'Grandiosa',
       acceptedAnswers: [],
+      revealTitle: 'Lørdagspizza',
       media: { kind: 'audio', src: '/media/audio/k4-100.mp3', fadeInMs: 400, fadeOutMs: 600 },
     },
     {
@@ -215,6 +216,8 @@ export const gamePackDefinition: GamePackDefinition = {
       type: 'ai-song',
       answer: 'Toyota',
       acceptedAnswers: [],
+      revealTitle: "Toyota'n til Magdi",
+      revealArtist: 'Karpe',
       media: { kind: 'audio', src: '/media/audio/k4-200.mp3', fadeInMs: 400, fadeOutMs: 600 },
     },
     {
@@ -222,9 +225,10 @@ export const gamePackDefinition: GamePackDefinition = {
       categoryId: 'kategori-4',
       value: 300,
       type: 'song',
-      answer: 'Veuve Clicquot',
+      answer: 'Nike',
       acceptedAnswers: [],
-      revealTitle: 'En solskinnsdag',
+      revealTitle: 'Nikes',
+      revealArtist: 'Frank Ocean',
       media: { kind: 'audio', src: '/media/audio/k4-300.mp3', fadeInMs: 300, fadeOutMs: 600 },
     },
     {
@@ -245,6 +249,8 @@ export const gamePackDefinition: GamePackDefinition = {
       type: 'ai-song',
       answer: 'Prada',
       acceptedAnswers: [],
+      revealTitle: 'Prada',
+      revealArtist: 'Cassö & Raye',
       media: { kind: 'audio', src: '/media/audio/k4-500.mp3', fadeInMs: 400, fadeOutMs: 600 },
     },
 

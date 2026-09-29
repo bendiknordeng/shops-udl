@@ -1,26 +1,26 @@
 :root {
-  /* Scene: moderne klubb møter retro-TV gameshow */
-  --bg-void: #08010f;
-  --bg-stage: #12041f;
-  --bg-surface: #1d0a34;
-  --bg-raised: #2a1148;
-  --bg-overlay: rgba(8, 1, 15, 0.86);
+  /* Scene: italiensk aften — flaggets grønn/hvit/rød + toskansk gull */
+  --bg-void: #06100b;
+  --bg-stage: #0a1a10;
+  --bg-surface: #0f2416;
+  --bg-raised: #16351f;
+  --bg-overlay: rgba(6, 16, 11, 0.86);
 
-  --ink: #f6edff;
-  --ink-warm: #ffe9c2;
-  --ink-muted: #b9a4d6;
-  --ink-faint: #7c6a99;
+  --ink: #f6f3e9;
+  --ink-warm: #ffe6b8;
+  --ink-muted: #aec4ac;
+  --ink-faint: #708a72;
 
-  --gold: #ffb628;
-  --gold-deep: #d98f00;
-  --pink: #ff3d81;
-  --cyan: #35e0ff;
-  --lime: #9dff5c;
-  --danger: #ff5c5c;
+  --gold: #f2c14e;
+  --gold-deep: #c9972c;
+  --pink: #cd212a;
+  --cyan: #2ea44f;
+  --lime: #8fd66a;
+  --danger: #e23b3b;
 
-  --tile-face: linear-gradient(160deg, #2c1250 0%, #1c0a36 60%, #150726 100%);
-  --tile-edge: rgba(255, 182, 40, 0.35);
-  --spotlight: radial-gradient(ellipse at 50% 0%, rgba(255, 182, 40, 0.18), transparent 65%);
+  --tile-face: linear-gradient(160deg, #17492a 0%, #0f3420 60%, #0b2618 100%);
+  --tile-edge: rgba(242, 193, 78, 0.35);
+  --spotlight: radial-gradient(ellipse at 50% 0%, rgba(242, 193, 78, 0.16), transparent 65%);
 
   --font-display: 'Bebas Neue', 'Arial Narrow', 'Impact', sans-serif;
   --font-ui: 'Outfit Variable', 'Avenir Next', 'Helvetica Neue', sans-serif;
@@ -29,11 +29,11 @@
   --radius-m: 12px;
   --radius-l: 20px;
 
-  --shadow-tile: 0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 233, 194, 0.08);
+  --shadow-tile: 0 6px 18px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 230, 184, 0.08);
   --shadow-pop: 0 18px 60px rgba(0, 0, 0, 0.7);
-  --glow-gold: 0 0 22px rgba(255, 182, 40, 0.4);
-  --glow-pink: 0 0 26px rgba(255, 61, 129, 0.45);
-  --glow-cyan: 0 0 22px rgba(53, 224, 255, 0.4);
+  --glow-gold: 0 0 22px rgba(242, 193, 78, 0.4);
+  --glow-pink: 0 0 26px rgba(205, 33, 42, 0.45);
+  --glow-cyan: 0 0 22px rgba(46, 164, 79, 0.4);
 
   --ease-stage: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-snap: cubic-bezier(0.34, 1.56, 0.64, 1);

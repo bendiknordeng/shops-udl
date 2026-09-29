@@ -1,8 +1,8 @@
 import type { CSSProperties } from 'react'
 
 const TEAM_COLORS = [
-  { color: '#ff4f91', rgb: '255 79 145', contrast: '#16040c' },
-  { color: '#35e0ff', rgb: '53 224 255', contrast: '#031216' },
+  { color: '#f4f5f0', rgb: '244 245 240', contrast: '#141410' },
+  { color: '#cd212a', rgb: '205 33 42', contrast: '#fff5f2' },
   { color: '#9dff5c', rgb: '157 255 92', contrast: '#071304' },
   { color: '#ffad42', rgb: '255 173 66', contrast: '#170d02' },
   { color: '#aa8dff', rgb: '170 141 255', contrast: '#0d0718' },

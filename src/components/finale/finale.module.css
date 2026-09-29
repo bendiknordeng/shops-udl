@@ -59,7 +59,7 @@
   inset: 0;
   background:
     radial-gradient(ellipse at 50% -20%, rgba(255, 182, 40, 0.22), transparent 55%),
-    radial-gradient(ellipse at 20% 110%, rgba(255, 61, 129, 0.16), transparent 50%),
+    radial-gradient(ellipse at 20% 110%, rgba(205, 33, 42, 0.16), transparent 50%),
     var(--bg-stage);
   display: flex;
   flex-direction: column;
@@ -95,7 +95,7 @@
   z-index: 2;
   background:
     linear-gradient(155deg, rgb(var(--team-color-rgb) / 0.28), transparent 58%),
-    linear-gradient(170deg, #3a1a63, #22093f);
+    linear-gradient(170deg, #17492a, #0f2416);
   border: 2px solid var(--team-color);
   border-radius: var(--radius-l);
   box-shadow: var(--shadow-pop), 0 0 30px rgb(var(--team-color-rgb) / 0.48);

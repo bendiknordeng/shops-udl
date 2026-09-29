@@ -4,6 +4,26 @@
   flex-direction: column;
   gap: var(--board-gap);
   padding: clamp(10px, 1.6vh, 20px);
+  position: relative;
+}
+
+/* Elegant italiensk trikolore-aksent øverst på brettet */
+.board::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: clamp(10px, 1.6vh, 20px);
+  right: clamp(10px, 1.6vh, 20px);
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    #008c45 0 33.333%,
+    #f4f5f0 33.333% 66.666%,
+    #cd212a 66.666% 100%
+  );
+  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.4);
 }
 
 .grid {
@@ -22,7 +42,7 @@
 }
 
 .categoryHeader {
-  background: linear-gradient(180deg, #33135c, #22093f);
+  background: linear-gradient(180deg, #17492a, #0f2416);
   border: 1px solid var(--tile-edge);
   border-radius: var(--radius-m);
   display: flex;
@@ -35,7 +55,7 @@
   line-height: 1.08;
   letter-spacing: 0.08em;
   color: var(--cyan);
-  text-shadow: 0 0 14px rgba(53, 224, 255, 0.4);
+  text-shadow: 0 0 14px rgba(46, 164, 79, 0.4);
   overflow-wrap: anywhere;
 }
 
@@ -114,7 +134,7 @@
 }
 
 .tileUsed {
-  background: #130724;
+  background: #081409;
   border-color: rgba(255, 182, 40, 0.34);
   box-shadow: none;
 }
@@ -131,7 +151,7 @@
 
 .tileUsedAudio {
   background: #0b2026;
-  border-color: rgba(53, 224, 255, 0.3);
+  border-color: rgba(46, 164, 79, 0.3);
 }
 
 .tile.tileKeyboardHighlighted {
@@ -194,10 +214,10 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  color: rgba(53, 224, 255, 0.72);
+  color: rgba(46, 164, 79, 0.72);
   background:
-    radial-gradient(circle at 50% 42%, rgba(53, 224, 255, 0.13), transparent 58%),
-    linear-gradient(145deg, #17353c, #09171b);
+    radial-gradient(circle at 50% 42%, rgba(46, 164, 79, 0.13), transparent 58%),
+    linear-gradient(145deg, #17492a, #09171b);
 }
 
 .usedClueDisc {
@@ -205,10 +225,10 @@
   place-items: center;
   width: 42px;
   height: 42px;
-  border: 1px solid rgba(53, 224, 255, 0.42);
+  border: 1px solid rgba(46, 164, 79, 0.42);
   border-radius: 50%;
   background: rgba(5, 18, 22, 0.72);
-  box-shadow: 0 0 14px rgba(53, 224, 255, 0.16);
+  box-shadow: 0 0 14px rgba(46, 164, 79, 0.16);
 }
 
 .usedClueWave {
@@ -223,7 +243,7 @@
   height: 42%;
   border-radius: 999px;
   background: currentColor;
-  box-shadow: 0 0 6px rgba(53, 224, 255, 0.36);
+  box-shadow: 0 0 6px rgba(46, 164, 79, 0.36);
 }
 
 .usedClueWave i:nth-child(2),

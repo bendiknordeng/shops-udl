@@ -53,7 +53,7 @@
 
 .countdown[data-urgency='high'] .ringFill {
   stroke: var(--pink);
-  filter: drop-shadow(0 0 10px rgba(255, 61, 129, 0.6));
+  filter: drop-shadow(0 0 10px rgba(205, 33, 42, 0.6));
 }
 
 .countdown[data-urgency='critical'] {

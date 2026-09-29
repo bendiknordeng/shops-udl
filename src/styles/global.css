@@ -112,7 +112,7 @@ p {
 }
 
 .stageButton--danger {
-  background: linear-gradient(180deg, var(--pink) 0%, #c21b57 100%);
+  background: linear-gradient(180deg, var(--pink) 0%, #a01820 100%);
   color: var(--ink);
   box-shadow: var(--shadow-tile), var(--glow-pink);
 }

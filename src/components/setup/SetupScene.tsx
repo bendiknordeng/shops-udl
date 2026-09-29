@@ -8,7 +8,6 @@ import {
   allocateManualTeams,
   allocateRandomTeams,
   drawTeamNames,
-  expectedTeamSizes,
 } from '../../game/allocate-teams'
 import {
   canStartGame,
@@ -154,12 +153,6 @@ export function SetupScene() {
     { scope: sceneRef, dependencies: [namesKey] },
   )
 
-  const sizes = useMemo(
-    () => expectedTeamSizes(teamParticipants.length, context.teamCount),
-    [teamParticipants.length, context.teamCount],
-  )
-  const uneven = new Set(sizes).size > 1
-
   function handleDraw() {
     setPresentationTeamIndex(null)
     const teams = allocateRandomTeams(teamParticipants, context.teamCount)
@@ -201,7 +194,7 @@ export function SetupScene() {
   return (
     <div ref={sceneRef} className={styles.scene}>
       <h1 className={styles.title} data-anim="title">
-        AI&D Young <span className={styles.titleAccent}>Dyrkes</span>
+        Italiensk <span className={styles.titleAccent}>aften</span>
       </h1>
 
       <div className={styles.controlsRow} data-anim="controls">
@@ -220,10 +213,6 @@ export function SetupScene() {
                 </button>
               ))}
             </div>
-            <span className={styles.countHint}>
-              {context.teamCount} lag · {sizes.join(' / ')} spillere
-              {uneven ? ' (ulik fordeling)' : ''}
-            </span>
           </div>
         )}
 

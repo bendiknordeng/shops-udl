@@ -2,8 +2,8 @@
   height: 100%;
   overflow-y: auto;
   background:
-    radial-gradient(ellipse at 50% -10%, rgba(255, 61, 129, 0.16), transparent 55%),
-    radial-gradient(ellipse at 15% 110%, rgba(53, 224, 255, 0.1), transparent 50%),
+    radial-gradient(ellipse at 50% -10%, rgba(205, 33, 42, 0.16), transparent 55%),
+    radial-gradient(ellipse at 15% 110%, rgba(46, 164, 79, 0.1), transparent 50%),
     var(--bg-stage);
   display: flex;
   flex-direction: column;
@@ -33,7 +33,7 @@
 
 .titleAccent {
   color: var(--pink);
-  text-shadow: 0 0 30px rgba(255, 61, 129, 0.5);
+  text-shadow: 0 0 30px rgba(205, 33, 42, 0.5);
 }
 
 .intro {
@@ -174,7 +174,8 @@
   justify-content: center;
   gap: 16px;
   width: 100%;
-  max-width: 1140px;
+  /* 4 kort per rad (4×176 + 3×16) → 7 deltakere blir 4 + 3 sentrert */
+  max-width: 752px;
 }
 
 .poolItem {
@@ -390,8 +391,8 @@
   z-index: 100;
   overflow-y: auto;
   background:
-    radial-gradient(circle at 50% 18%, rgba(255, 61, 129, 0.28), transparent 32%),
-    radial-gradient(circle at 18% 80%, rgba(53, 224, 255, 0.2), transparent 34%),
+    radial-gradient(circle at 50% 18%, rgba(205, 33, 42, 0.28), transparent 32%),
+    radial-gradient(circle at 18% 80%, rgba(46, 164, 79, 0.2), transparent 34%),
     radial-gradient(circle at 82% 76%, rgba(255, 182, 40, 0.18), transparent 35%),
     rgba(8, 1, 15, 0.97);
 }
@@ -619,7 +620,7 @@
   position: absolute;
   inset: -25%;
   pointer-events: none;
-  background: radial-gradient(circle, rgba(255, 61, 129, 0.22), transparent 62%);
+  background: radial-gradient(circle, rgba(205, 33, 42, 0.22), transparent 62%);
   animation: avatarGlow 2.8s ease-in-out infinite alternate;
 }
 

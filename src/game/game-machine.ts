@@ -161,8 +161,10 @@ export function createGameMachine(pack: GamePack) {
       }),
       beginCountdown: assign({
         timer: ({ context }) => {
-          // Alltid den bestemte svartiden (default 30 s) — uavhengig av type.
-          return startTimer(context.answerSeconds)
+          // Den bestemte svartiden (default 30 s). AI-sanger får 10 s ekstra.
+          const clue = findClue(pack, context.activeClueId)
+          const bonus = clue?.type === 'ai-song' ? 10 : 0
+          return startTimer(context.answerSeconds + bonus)
         },
         answerWindowTimer: idleTimer,
         mediaError: null,
